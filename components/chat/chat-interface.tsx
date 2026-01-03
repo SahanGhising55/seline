@@ -1,0 +1,474 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { Shell } from "@/components/layout/shell";
+import { Thread } from "@/components/assistant-ui/thread";
+import { ChatProvider } from "@/components/chat-provider";
+import { CharacterProvider, type CharacterDisplayData, getCharacterInitials } from "@/components/assistant-ui/character-context";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ArrowLeft, Loader2, PlusCircle, MessageCircle, Trash2, Clock, BarChart2, Camera, Brain } from "lucide-react";
+import Link from "next/link";
+import type { UIMessage } from "ai";
+import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { DocumentsPanel } from "@/components/documents/documents-panel";
+import { AvatarSelectionDialog } from "@/components/avatar-selection-dialog";
+import { useTranslations, useFormatter } from "next-intl";
+import { convertDBMessagesToUIMessages } from "@/lib/messages/converter";
+
+interface CharacterFullData {
+    id: string;
+    name: string;
+    displayName?: string | null;
+    tagline?: string | null;
+    status: string;
+    voice?: {
+        exampleGreeting?: string | null;
+    } | null;
+    images?: Array<{
+        url: string;
+        isPrimary: boolean;
+        imageType: string;
+    }>;
+}
+
+interface DBMessage {
+    id: string;
+    role: "user" | "assistant" | "system" | "tool";
+    content: unknown;
+    createdAt: Date | string;
+}
+
+interface SessionInfo {
+    id: string;
+    title: string | null;
+    createdAt: string;
+    updatedAt: string;
+    metadata: { characterId?: string; characterName?: string };
+}
+
+interface ChatInterfaceProps {
+    character: CharacterFullData;
+    initialSessionId: string;
+    initialSessions: SessionInfo[];
+    initialMessages: UIMessage[];
+    characterDisplay: CharacterDisplayData;
+}
+
+export default function ChatInterface({
+    character,
+    initialSessionId,
+    initialSessions,
+    initialMessages,
+    characterDisplay: initialCharacterDisplay,
+}: ChatInterfaceProps) {
+    const router = useRouter();
+    const t = useTranslations("chat");
+    const tc = useTranslations("common");
+
+    const [sessionId, setSessionId] = useState(initialSessionId);
+    // Sort initialSessions to ensure consistent ordering (most recent first)
+    const [sessions, setSessions] = useState<SessionInfo[]>(() =>
+        [...initialSessions].sort(
+            (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        )
+    );
+    const [messages, setMessages] = useState<UIMessage[]>(initialMessages);
+    const [characterDisplay, setCharacterDisplay] = useState<CharacterDisplayData>(initialCharacterDisplay);
+    const [isLoading, setIsLoading] = useState(false);
+    const [loadingSessions, setLoadingSessions] = useState(false);
+
+    const loadSessions = useCallback(async () => {
+        try {
+            setLoadingSessions(true);
+            const response = await fetch(`/api/sessions?characterId=${character.id}`);
+            if (response.ok) {
+                const data = await response.json();
+                const sortedSessions: SessionInfo[] = (data.sessions || []).sort(
+                    (a: SessionInfo, b: SessionInfo) =>
+                        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+                );
+                setSessions(sortedSessions);
+            }
+        } catch (err) {
+            console.error("Failed to load sessions:", err);
+        } finally {
+            setLoadingSessions(false);
+        }
+    }, [character.id]);
+
+    const switchSession = useCallback(
+        async (newSessionId: string) => {
+            try {
+                setIsLoading(true);
+                const messagesResponse = await fetch(`/api/sessions/${newSessionId}`);
+                if (messagesResponse.ok) {
+                    const data = await messagesResponse.json();
+                    const dbMessages = (data.messages || []) as DBMessage[];
+                    const uiMessages = convertDBMessagesToUIMessages(dbMessages);
+                    setMessages(uiMessages);
+                    setSessionId(newSessionId);
+                    router.replace(`/chat/${character.id}?sessionId=${newSessionId}`, { scroll: false });
+                }
+            } catch (err) {
+                console.error("Failed to switch session:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [character.id, router]
+    );
+
+    const createNewSession = useCallback(
+        async () => {
+            try {
+                setIsLoading(true);
+                const response = await fetch("/api/sessions", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        forceNew: true,
+                        metadata: { characterId: character.id, characterName: character.name },
+                    }),
+                });
+                if (response.ok) {
+                    const { session } = await response.json();
+                    setSessionId(session.id);
+                    setMessages([]);
+                    await loadSessions();
+                    router.replace(`/chat/${character.id}?sessionId=${session.id}`, { scroll: false });
+                }
+            } catch (err) {
+                console.error("Failed to create new session:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [character.id, character.name, loadSessions, router]
+    );
+
+    const deleteSession = useCallback(
+        async (sessionToDeleteId: string) => {
+            try {
+                const response = await fetch(`/api/sessions/${sessionToDeleteId}`, {
+                    method: "DELETE",
+                });
+                if (response.ok) {
+                    if (sessionToDeleteId === sessionId) {
+                        const remainingSessions = sessions.filter((s) => s.id !== sessionToDeleteId);
+                        if (remainingSessions.length > 0) {
+                            await switchSession(remainingSessions[0].id);
+                        } else {
+                            await createNewSession();
+                        }
+                    }
+                    await loadSessions();
+                }
+            } catch (err) {
+                console.error("Failed to delete session:", err);
+            }
+        },
+        [sessionId, sessions, switchSession, createNewSession, loadSessions]
+    );
+
+    const handleAvatarChange = useCallback((newAvatarUrl: string | null) => {
+        setCharacterDisplay((prev) => ({
+            ...prev,
+            avatarUrl: newAvatarUrl,
+            primaryImageUrl: newAvatarUrl || prev.primaryImageUrl,
+        }));
+    }, []);
+
+    if (isLoading) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="text-muted-foreground">{t("loading")}</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <Shell
+            sidebarHeader={<ChatSidebarHeader label={tc("back")} onBack={() => router.push("/")} />}
+            sidebar={
+                <CharacterSidebar
+                    character={character}
+                    characterDisplay={characterDisplay}
+                    sessions={sessions}
+                    currentSessionId={sessionId}
+                    loadingSessions={loadingSessions}
+                    onNewSession={createNewSession}
+                    onSwitchSession={switchSession}
+                    onDeleteSession={deleteSession}
+                    onAvatarChange={handleAvatarChange}
+                />
+            }
+        >
+            <CharacterProvider character={characterDisplay}>
+                <ChatProvider
+                    key={sessionId}
+                    sessionId={sessionId}
+                    characterId={character.id}
+                    initialMessages={messages}
+                >
+                    <Thread />
+                </ChatProvider>
+            </CharacterProvider>
+        </Shell>
+    );
+}
+
+function ChatSidebarHeader({
+    label,
+    onBack,
+}: {
+    label: string;
+    onBack: () => void;
+}) {
+    return (
+        <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            className="gap-2 text-terminal-dark hover:bg-terminal-dark/8 transition-all duration-200"
+        >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="text-sm font-mono">{label}</span>
+        </Button>
+    );
+}
+
+function CharacterSidebar({
+    character,
+    characterDisplay,
+    sessions,
+    currentSessionId,
+    loadingSessions,
+    onNewSession,
+    onSwitchSession,
+    onDeleteSession,
+    onAvatarChange,
+}: {
+    character: CharacterFullData;
+    characterDisplay: CharacterDisplayData | null;
+    sessions: SessionInfo[];
+    currentSessionId: string | null;
+    loadingSessions: boolean;
+    onNewSession: () => void;
+    onSwitchSession: (sessionId: string) => void;
+    onDeleteSession: (sessionId: string) => void;
+    onAvatarChange: (newAvatarUrl: string | null) => void;
+}) {
+    const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
+    const avatarUrl = characterDisplay?.avatarUrl || characterDisplay?.primaryImageUrl;
+    const initials = characterDisplay?.initials || character.name.substring(0, 2).toUpperCase();
+    const t = useTranslations("chat");
+    const formatter = useFormatter();
+
+    const parseAsUTC = (dateStr: string): Date => {
+        const normalized =
+            dateStr.includes("Z") || dateStr.includes("+") || dateStr.includes("-", 10)
+                ? dateStr
+                : dateStr.replace(" ", "T") + "Z";
+        return new Date(normalized);
+    };
+
+    const formatSessionDate = (dateStr: string): string => {
+        const date = parseAsUTC(dateStr);
+
+        if (isNaN(date.getTime())) {
+            return t("session.invalid");
+        }
+
+        const now = new Date();
+        const diff = now.getTime() - date.getTime();
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+        if (days === 0) {
+            return formatter.dateTime(date, {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+            });
+        } else if (days === 1) {
+            return t("session.yesterday");
+        } else if (days < 7) {
+            return formatter.dateTime(date, { weekday: "short" });
+        } else {
+            return formatter.dateTime(date, { month: "short", day: "numeric" });
+        }
+    };
+
+    return (
+        <div className="flex h-full flex-col overflow-hidden">
+            <AvatarSelectionDialog
+                open={avatarDialogOpen}
+                onOpenChange={setAvatarDialogOpen}
+                characterId={character.id}
+                characterName={character.displayName || character.name}
+                currentAvatarUrl={avatarUrl || null}
+                onAvatarChange={(url) => {
+                    onAvatarChange(url);
+                    setAvatarDialogOpen(false);
+                }}
+            />
+
+            <div className="shrink-0 px-4 pt-3 pb-3">
+                <div
+                    className={cn(
+                        "flex flex-col items-center text-center gap-3 p-4 rounded-lg",
+                        "bg-terminal-cream/80 border border-terminal-border/30",
+                        "shadow-sm transition-all duration-200",
+                        "hover:bg-terminal-cream/90 hover:border-terminal-border/50"
+                    )}
+                >
+                    <button
+                        onClick={() => setAvatarDialogOpen(true)}
+                        className="relative group cursor-pointer"
+                        title={t("sidebar.changeAvatar")}
+                    >
+                        <Avatar className="w-16 h-16 shadow-md transition-transform duration-200 group-hover:scale-105">
+                            {avatarUrl ? <AvatarImage src={avatarUrl} alt={character.name} /> : null}
+                            <AvatarFallback className="bg-terminal-green/10 text-xl font-mono text-terminal-green">
+                                {initials}
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className="absolute inset-0 rounded-full bg-terminal-dark/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                            <Camera className="w-5 h-5 text-terminal-cream" />
+                        </div>
+                    </button>
+                    <div>
+                        <h2 className="font-semibold font-mono text-terminal-dark">
+                            {character.displayName || character.name}
+                        </h2>
+                        {character.tagline && (
+                            <p className="text-xs text-terminal-muted/80 font-mono mt-1.5 line-clamp-2 leading-relaxed">
+                                {character.tagline}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                    <div className="shrink-0 flex items-center justify-between px-4 py-2 mb-1">
+                        <h3 className="text-xs font-semibold font-mono text-terminal-dark uppercase tracking-wider">
+                            {t("sidebar.history")}
+                        </h3>
+                        <div className="flex items-center gap-1.5">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                asChild
+                                className="h-8 w-8 p-0 text-terminal-muted hover:text-terminal-green hover:bg-terminal-green/10 transition-all duration-200 active:bg-terminal-green/15"
+                                title={t("sidebar.agentMemory")}
+                            >
+                                <Link href={`/agents/${character.id}/memory`}>
+                                    <Brain className="h-4 w-4" />
+                                </Link>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                asChild
+                                className="h-8 w-8 p-0 text-terminal-muted hover:text-terminal-green hover:bg-terminal-green/10 transition-all duration-200 active:bg-terminal-green/15"
+                                title={t("sidebar.usage")}
+                            >
+                                <Link href="/usage">
+                                    <BarChart2 className="h-4 w-4" />
+                                </Link>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={onNewSession}
+                                className="h-8 px-2.5 text-terminal-green hover:bg-terminal-green/10 transition-all duration-200 active:bg-terminal-green/15"
+                                title={t("sidebar.startNew")}
+                            >
+                                <PlusCircle className="h-4 w-4 mr-1" />
+                                <span className="text-xs font-mono font-medium">{t("sidebar.new")}</span>
+                            </Button>
+                        </div>
+                    </div>
+
+                    <ScrollArea className="flex-1 min-h-0 px-4">
+                        <div className="space-y-1.5 pr-2 pb-2">
+                            {loadingSessions ? (
+                                <div className="flex items-center justify-center py-6">
+                                    <Loader2 className="h-4 w-4 animate-spin text-terminal-muted" />
+                                </div>
+                            ) : sessions.length === 0 ? (
+                                <p className="text-xs text-terminal-muted font-mono py-6 text-center">
+                                    {t("sidebar.empty")}
+                                </p>
+                            ) : (
+                                sessions.map((session) => (
+                                    <div
+                                        key={session.id}
+                                        className={cn(
+                                            "group relative flex items-center gap-2.5 px-3 py-2.5 rounded-md cursor-pointer",
+                                            "transition-all duration-200 ease-out",
+                                            session.id === currentSessionId
+                                                ? "bg-terminal-green/15 border-l-2 border-terminal-green shadow-sm"
+                                                : "hover:bg-terminal-dark/8 border-l-2 border-transparent"
+                                        )}
+                                        onClick={() => onSwitchSession(session.id)}
+                                    >
+                                        <MessageCircle
+                                            className={cn(
+                                                "h-4 w-4 flex-shrink-0 transition-colors duration-200",
+                                                session.id === currentSessionId ? "text-terminal-green" : "text-terminal-muted"
+                                            )}
+                                        />
+                                        <div className="flex-1 min-w-0">
+                                            <p
+                                                className={cn(
+                                                    "text-sm font-mono truncate transition-colors duration-200",
+                                                    session.id === currentSessionId
+                                                        ? "text-terminal-dark font-medium"
+                                                        : "text-terminal-muted"
+                                                )}
+                                            >
+                                                {session.title || t("session.untitled")}
+                                            </p>
+                                            <p className="text-xs text-terminal-muted/70 font-mono flex items-center gap-1 mt-0.5">
+                                                <Clock className="h-3 w-3" />
+                                                {formatSessionDate(session.updatedAt)}
+                                            </p>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className={cn(
+                                                "h-7 w-7 p-0 opacity-0 group-hover:opacity-100",
+                                                "transition-all duration-150 ease-out",
+                                                "text-terminal-muted hover:text-red-500 hover:bg-red-50 rounded hover:shadow-sm"
+                                            )}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onDeleteSession(session.id);
+                                            }}
+                                            title={t("sidebar.delete")}
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </ScrollArea>
+                </div>
+
+                <div className="flex flex-col flex-1 min-h-0 overflow-hidden px-4 pb-4">
+                    <DocumentsPanel agentId={character.id} agentName={character.name} />
+                </div>
+            </div>
+        </div>
+    );
+}

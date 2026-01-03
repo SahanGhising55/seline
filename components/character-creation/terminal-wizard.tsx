@@ -1,0 +1,367 @@
+"use client";
+
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  IntroPage,
+  LoadingPage,
+  PreviewPage,
+  SuccessPage,
+  IdentityPage,
+  CapabilitiesPage,
+  KnowledgeBasePage,
+  VectorSearchPage,
+} from "./terminal-pages";
+import { useReducedMotion } from "./hooks/use-reduced-motion";
+import { useAgentExpansion } from "@/lib/characters/hooks";
+import { WizardProgress, WIZARD_STEPS, type WizardStep } from "@/components/ui/wizard-progress";
+import { WindowsTitleBar } from "@/components/layout/windows-titlebar";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import type { AgentIdentity } from "./terminal-pages/identity-page";
+import type { UploadedDocument } from "./terminal-pages/knowledge-base-page";
+
+type WizardPage =
+  | "intro"
+  | "identity"
+  | "capabilities"
+  | "knowledge"
+  | "vectorSearch"
+  | "loading"
+  | "preview"
+  | "success";
+
+/** Pages that should show the progress bar */
+const PROGRESS_PAGES: WizardPage[] = ["identity", "capabilities", "knowledge", "vectorSearch", "preview"];
+
+interface WizardState {
+  identity: AgentIdentity;
+  enabledTools: string[];
+  documents: UploadedDocument[];
+  createdCharacterId: string | null;
+}
+
+const initialState: WizardState = {
+  identity: { name: "", tagline: "", purpose: "" },
+  enabledTools: ["docsSearch"],
+  documents: [],
+  createdCharacterId: null,
+};
+
+const pageVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
+};
+
+export function TerminalWizard() {
+  const [currentPage, setCurrentPage] = useState<WizardPage>("intro");
+  const [state, setState] = useState<WizardState>(initialState);
+  const [draftAgentId, setDraftAgentId] = useState<string | null>(null);
+  const [direction, setDirection] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [vectorDBEnabled, setVectorDBEnabled] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const t = useTranslations("characterCreation.progress");
+  const router = useRouter();
+
+  // Fetch settings to check if Vector Search is enabled
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        setVectorDBEnabled(data.vectorDBEnabled === true);
+      })
+      .catch(console.error);
+  }, []);
+
+  // Build wizard steps with translations, filtering out vectorSearch if disabled
+  const wizardSteps = useMemo(() => {
+    const baseSteps = WIZARD_STEPS.filter(
+      (step) => step.id !== "vectorSearch" || vectorDBEnabled
+    );
+    return baseSteps.map((step) => ({
+      ...step,
+      label: t(step.id as "intro" | "identity" | "capabilities" | "knowledge" | "vectorSearch" | "preview"),
+    }));
+  }, [vectorDBEnabled, t]);
+
+  // Check if current page should show progress bar
+  const showProgressBar = PROGRESS_PAGES.includes(currentPage);
+
+  const navigateTo = useCallback((page: WizardPage, dir: number = 1) => {
+    setDirection(dir);
+    setCurrentPage(page);
+  }, []);
+
+  // Handle step click for backward navigation
+  const handleStepClick = useCallback((stepId: string) => {
+    navigateTo(stepId as WizardPage, -1);
+  }, [navigateTo]);
+
+  // Handle identity submission - create draft agent
+  const handleIdentitySubmit = async (identity: AgentIdentity) => {
+    setState((prev) => ({ ...prev, identity }));
+    setError(null);
+    navigateTo("loading");
+
+    try {
+      // Create draft agent via API
+      const response = await fetch("/api/characters/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          character: {
+            name: identity.name,
+            tagline: identity.tagline || undefined,
+          },
+          metadata: {
+            purpose: identity.purpose,
+            enabledTools: state.enabledTools,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to create draft agent");
+      }
+
+      const data = await response.json();
+      setDraftAgentId(data.character.id);
+      navigateTo("capabilities");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create agent");
+      navigateTo("identity", -1);
+    }
+  };
+
+  // Handle capabilities submission
+  const handleCapabilitiesSubmit = (enabledTools: string[]) => {
+    setState((prev) => ({ ...prev, enabledTools }));
+    navigateTo("knowledge");
+  };
+
+  // Handle knowledge base submission
+  const handleKnowledgeSubmit = (documents: UploadedDocument[]) => {
+    setState((prev) => ({ ...prev, documents }));
+    // Navigate to vector search if enabled, otherwise go to preview
+    if (vectorDBEnabled) {
+      navigateTo("vectorSearch");
+    } else {
+      navigateTo("preview");
+    }
+  };
+
+  // Handle vector search submission
+  const handleVectorSearchSubmit = () => {
+    navigateTo("preview");
+  };
+
+  // Agents expansion hook
+  const { expand, isExpanding: isExpandingConcept } = useAgentExpansion();
+
+  // Quick create: pre-fill identity and go to identity step
+  const handleQuickCreate = async (description: string) => {
+    setError(null);
+    navigateTo("loading");
+
+    try {
+      const expanded = await expand(description);
+
+      if (!expanded) {
+        throw new Error("Failed to generate agent profile. Please try manual creation.");
+      }
+
+      setState((prev) => ({
+        ...prev,
+        identity: {
+          name: expanded.name,
+          tagline: expanded.tagline,
+          purpose: expanded.purpose,
+        },
+      }));
+
+      navigateTo("identity");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to expand agent");
+      navigateTo("intro", -1);
+    }
+  };
+
+  // Finalize agent creation
+  const handleFinalizeAgent = async () => {
+    if (!draftAgentId) return;
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Update the draft agent with final configuration and activate it
+      const response = await fetch(`/api/characters/${draftAgentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          character: {
+            name: state.identity.name,
+            tagline: state.identity.tagline || undefined,
+            status: "active",
+          },
+          metadata: {
+            purpose: state.identity.purpose,
+            enabledTools: state.enabledTools,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to create agent");
+      }
+
+      setState((prev) => ({ ...prev, createdCharacterId: draftAgentId }));
+      navigateTo("success");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Creation failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const transitionProps = prefersReducedMotion
+    ? { duration: 0 }
+    : { type: "tween" as const, duration: 0.4, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] };
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-terminal-cream flex flex-col">
+      <WindowsTitleBar />
+      <div className="relative flex-1">
+        {/* Error Banner */}
+        {error && (
+          <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="absolute top-0 left-0 right-0 z-50 bg-red-500 text-white px-4 py-2 text-center font-mono text-sm"
+          >
+            Error: {error}
+            <button
+              onClick={() => setError(null)}
+              className="ml-4 underline hover:no-underline"
+            >
+              Dismiss
+            </button>
+          </motion.div>
+        )}
+
+        {/* Progress Bar - shown on main wizard pages */}
+        {showProgressBar && (
+          <WizardProgress
+            steps={wizardSteps}
+            currentStep={currentPage}
+            onStepClick={handleStepClick}
+            className="relative z-40"
+          />
+        )}
+
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentPage}
+            custom={direction}
+            variants={pageVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={transitionProps}
+            className={showProgressBar ? "absolute inset-0 pt-16" : "absolute inset-0"}
+          >
+            {currentPage === "intro" && (
+              <IntroPage
+                onContinue={() => navigateTo("identity")}
+                onQuickCreate={handleQuickCreate}
+                onBack={() => router.push("/")}
+              />
+            )}
+            {currentPage === "identity" && (
+              <IdentityPage
+                initialIdentity={state.identity}
+                onSubmit={handleIdentitySubmit}
+                onBack={() => navigateTo("intro", -1)}
+              />
+            )}
+            {currentPage === "capabilities" && (
+              <CapabilitiesPage
+                agentName={state.identity.name}
+                initialEnabledTools={state.enabledTools}
+                onSubmit={handleCapabilitiesSubmit}
+                onBack={() => navigateTo("identity", -1)}
+              />
+            )}
+            {currentPage === "knowledge" && draftAgentId && (
+              <KnowledgeBasePage
+                agentId={draftAgentId}
+                agentName={state.identity.name}
+                initialDocuments={state.documents}
+                onSubmit={handleKnowledgeSubmit}
+                onBack={() => navigateTo("capabilities", -1)}
+              />
+            )}
+            {currentPage === "vectorSearch" && draftAgentId && (
+              <VectorSearchPage
+                agentId={draftAgentId}
+                agentName={state.identity.name}
+                onSubmit={handleVectorSearchSubmit}
+                onBack={() => navigateTo("knowledge", -1)}
+                onSkip={handleVectorSearchSubmit}
+              />
+            )}
+            {currentPage === "loading" && (
+              <LoadingPage
+                characterName={state.identity.name || "Agent"}
+                onComplete={() => { }}
+                loadingTitle={isExpandingConcept ? "Enhancing Agent Concept..." : "Configuring Agent..."}
+                customMessages={isExpandingConcept ? [
+                  "Analyzing your request...",
+                  "Drafting agent identity...",
+                  "Defining core purpose...",
+                  "Optimizing instructions...",
+                  "Finalizing profile...",
+                ] : [
+                  "Initializing agent profile...",
+                  "Setting up capabilities...",
+                  "Preparing knowledge base...",
+                  "Finalizing configuration...",
+                ]}
+              />
+            )}
+            {currentPage === "preview" && (
+              <PreviewPage
+                identity={state.identity}
+                enabledTools={state.enabledTools}
+                documents={state.documents}
+                onConfirm={handleFinalizeAgent}
+                onBack={() => navigateTo(vectorDBEnabled ? "vectorSearch" : "knowledge", -1)}
+                isSubmitting={isSubmitting}
+              />
+            )}
+            {currentPage === "success" && state.createdCharacterId && (
+              <SuccessPage
+                characterId={state.createdCharacterId}
+                characterName={state.identity.name}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}

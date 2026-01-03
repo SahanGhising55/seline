@@ -1,0 +1,567 @@
+import { db } from "./sqlite-client";
+import {
+  sessions,
+  messages,
+  toolRuns,
+  webBrowseEntries,
+  images,
+  users,
+  agentDocuments,
+  agentDocumentChunks,
+} from "./sqlite-schema";
+import type {
+  NewSession,
+  NewMessage,
+  NewToolRun,
+  NewWebBrowseEntry,
+  NewImage,
+  Session,
+  WebBrowseEntry,
+  AgentDocument,
+  NewAgentDocument,
+  AgentDocumentChunk,
+  NewAgentDocumentChunk,
+} from "./sqlite-schema";
+import { eq, desc, asc, and, lt, gt, sql, notInArray, or, like, inArray } from "drizzle-orm";
+
+// Users
+export async function getOrCreateUserByExternalId(externalId: string, email?: string | null) {
+  const existingUser = await db.query.users.findFirst({
+    where: eq(users.externalId, externalId),
+  });
+
+  if (existingUser) {
+    return existingUser;
+  }
+
+  // Email is required - use provided email or generate placeholder from externalId
+  const userEmail = email || `${externalId}@local.styly`;
+
+  const [newUser] = await db
+    .insert(users)
+    .values({
+      externalId,
+      email: userEmail,
+    })
+    .returning();
+
+  return newUser;
+}
+
+export async function getUserByExternalId(externalId: string) {
+  return db.query.users.findFirst({
+    where: eq(users.externalId, externalId),
+  });
+}
+
+export async function getOrCreateLocalUser(userId: string, email: string) {
+  const existingUser = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+
+  if (existingUser) {
+    return existingUser;
+  }
+
+  const [newUser] = await db
+    .insert(users)
+    .values({ id: userId, email })
+    .returning();
+
+  return newUser;
+}
+
+// Sessions
+export async function createSession(data: NewSession) {
+  const [session] = await db.insert(sessions).values(data).returning();
+  return session;
+}
+
+export async function getSession(id: string) {
+  return db.query.sessions.findFirst({
+    where: eq(sessions.id, id),
+  });
+}
+
+export async function getSessionWithMessages(id: string) {
+  const session = await db.query.sessions.findFirst({
+    where: eq(sessions.id, id),
+  });
+
+  if (!session) return null;
+
+  const msgs = await db.query.messages.findMany({
+    where: eq(messages.sessionId, id),
+    orderBy: asc(messages.createdAt),
+  });
+
+  return { session, messages: msgs };
+}
+
+export async function listSessions(userId?: string, limit = 50) {
+  const conditions = userId ? eq(sessions.userId, userId) : undefined;
+
+  return db.query.sessions.findMany({
+    where: conditions ? and(conditions, eq(sessions.status, "active")) : eq(sessions.status, "active"),
+    orderBy: desc(sessions.updatedAt),
+    limit,
+  });
+}
+
+export async function getSessionByCharacterId(userId: string, characterId: string): Promise<Session | null> {
+  // SQLite JSON extraction syntax
+  const result = await db
+    .select()
+    .from(sessions)
+    .where(
+      and(
+        eq(sessions.userId, userId),
+        eq(sessions.status, "active"),
+        sql`json_extract(${sessions.metadata}, '$.characterId') = ${characterId}`
+      )
+    )
+    .orderBy(desc(sessions.updatedAt))
+    .limit(1);
+
+  return result[0] || null;
+}
+
+/**
+ * List all sessions for a specific character
+ */
+export async function listSessionsByCharacterId(
+  userId: string,
+  characterId: string,
+  limit = 50
+): Promise<Session[]> {
+  const result = await db
+    .select()
+    .from(sessions)
+    .where(
+      and(
+        eq(sessions.userId, userId),
+        eq(sessions.status, "active"),
+        sql`json_extract(${sessions.metadata}, '$.characterId') = ${characterId}`
+      )
+    )
+    .orderBy(desc(sessions.updatedAt))
+    .limit(limit);
+
+  return result;
+}
+
+/**
+ * Get session count for a character
+ */
+export async function getCharacterSessionCount(
+  userId: string,
+  characterId: string
+): Promise<number> {
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(sessions)
+    .where(
+      and(
+        eq(sessions.userId, userId),
+        eq(sessions.status, "active"),
+        sql`json_extract(${sessions.metadata}, '$.characterId') = ${characterId}`
+      )
+    );
+
+  return result[0]?.count || 0;
+}
+
+export async function getOrCreateCharacterSession(
+  userId: string,
+  characterId: string,
+  characterName: string
+): Promise<{ session: Session; isNew: boolean }> {
+  const existingSession = await getSessionByCharacterId(userId, characterId);
+
+  if (existingSession) {
+    return { session: existingSession, isNew: false };
+  }
+
+  const newSession = await createSession({
+    title: `Chat with ${characterName}`,
+    userId,
+    metadata: { characterId, characterName },
+  });
+
+  return { session: newSession, isNew: true };
+}
+
+export async function updateSession(id: string, data: Partial<NewSession>) {
+  const [session] = await db
+    .update(sessions)
+    .set({ ...data, updatedAt: new Date().toISOString() })
+    .where(eq(sessions.id, id))
+    .returning();
+  return session;
+}
+
+export async function updateSessionSummary(
+  id: string,
+  summary: string,
+  summaryUpToMessageId: string
+) {
+  return updateSession(id, { summary, summaryUpToMessageId });
+}
+
+// Messages
+export async function createMessage(data: NewMessage) {
+  try {
+    const [message] = await db
+      .insert(messages)
+      .values(data)
+      .returning();
+
+    if (message) {
+      await db
+        .update(sessions)
+        .set({ updatedAt: new Date().toISOString() })
+        .where(eq(sessions.id, data.sessionId));
+    }
+
+    return message;
+  } catch (error) {
+    // Handle unique constraint violation (message already exists)
+    if ((error as Error).message?.includes('UNIQUE constraint failed')) {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
+export async function getMessages(sessionId: string) {
+  return db.query.messages.findMany({
+    where: eq(messages.sessionId, sessionId),
+    orderBy: asc(messages.createdAt),
+  });
+}
+
+export async function getNonCompactedMessages(sessionId: string) {
+  return db.query.messages.findMany({
+    where: and(
+      eq(messages.sessionId, sessionId),
+      eq(messages.isCompacted, false)
+    ),
+    orderBy: asc(messages.createdAt),
+  });
+}
+
+export async function markMessagesAsCompacted(
+  sessionId: string,
+  beforeMessageId: string
+) {
+  const targetMessage = await db.query.messages.findFirst({
+    where: eq(messages.id, beforeMessageId),
+  });
+
+  if (!targetMessage) return;
+
+  await db
+    .update(messages)
+    .set({ isCompacted: true })
+    .where(
+      and(
+        eq(messages.sessionId, sessionId),
+        lt(messages.createdAt, targetMessage.createdAt)
+      )
+    );
+}
+
+// Tool Runs
+export async function createToolRun(data: NewToolRun) {
+  const [toolRun] = await db.insert(toolRuns).values(data).returning();
+  return toolRun;
+}
+
+export async function updateToolRun(
+  id: string,
+  data: Partial<Omit<NewToolRun, "id" | "sessionId">>
+) {
+  const [toolRun] = await db
+    .update(toolRuns)
+    .set(data)
+    .where(eq(toolRuns.id, id))
+    .returning();
+  return toolRun;
+}
+
+export async function getToolRun(id: string) {
+  return db.query.toolRuns.findFirst({
+    where: eq(toolRuns.id, id),
+  });
+}
+
+// Web Browse Entries
+export async function upsertWebBrowseEntry(data: NewWebBrowseEntry): Promise<WebBrowseEntry> {
+  await db
+    .delete(webBrowseEntries)
+    .where(and(eq(webBrowseEntries.sessionId, data.sessionId), eq(webBrowseEntries.url, data.url)));
+
+  const [entry] = await db
+    .insert(webBrowseEntries)
+    .values(data)
+    .returning();
+
+  return entry;
+}
+
+export async function listWebBrowseEntries(sessionId: string): Promise<WebBrowseEntry[]> {
+  const now = new Date().toISOString();
+  return db.query.webBrowseEntries.findMany({
+    where: and(eq(webBrowseEntries.sessionId, sessionId), gt(webBrowseEntries.expiresAt, now)),
+    orderBy: desc(webBrowseEntries.fetchedAt),
+  });
+}
+
+export async function listWebBrowseEntriesByUrls(
+  sessionId: string,
+  urls: string[]
+): Promise<WebBrowseEntry[]> {
+  if (urls.length === 0) return [];
+  const now = new Date().toISOString();
+  return db.query.webBrowseEntries.findMany({
+    where: and(
+      eq(webBrowseEntries.sessionId, sessionId),
+      inArray(webBrowseEntries.url, urls),
+      gt(webBrowseEntries.expiresAt, now)
+    ),
+    orderBy: desc(webBrowseEntries.fetchedAt),
+  });
+}
+
+export async function deleteWebBrowseEntries(sessionId: string): Promise<void> {
+  await db.delete(webBrowseEntries).where(eq(webBrowseEntries.sessionId, sessionId));
+}
+
+export async function deleteExpiredWebBrowseEntries(): Promise<number> {
+  const now = new Date().toISOString();
+  const deleted = await db
+    .delete(webBrowseEntries)
+    .where(lt(webBrowseEntries.expiresAt, now))
+    .returning({ id: webBrowseEntries.id });
+  return deleted.length;
+}
+
+// Images
+export async function createImage(data: NewImage) {
+  const [image] = await db.insert(images).values(data).returning();
+  return image;
+}
+
+export async function getSessionImages(sessionId: string) {
+  return db.query.images.findMany({
+    where: eq(images.sessionId, sessionId),
+    orderBy: desc(images.createdAt),
+  });
+}
+
+export async function getImage(id: string) {
+  return db.query.images.findFirst({
+    where: eq(images.id, id),
+  });
+}
+
+// Agent Documents & Chunks
+
+export async function createAgentDocument(data: NewAgentDocument): Promise<AgentDocument> {
+  const [document] = await db.insert(agentDocuments).values(data).returning();
+  return document;
+}
+
+export async function getAgentDocumentById(
+  id: string,
+  userId: string
+): Promise<AgentDocument | null> {
+  const document = await db.query.agentDocuments.findFirst({
+    where: and(eq(agentDocuments.id, id), eq(agentDocuments.userId, userId)),
+  });
+  return document ?? null;
+}
+
+export async function listAgentDocumentsForCharacter(
+  userId: string,
+  characterId: string,
+  limit = 100
+): Promise<AgentDocument[]> {
+  return db.query.agentDocuments.findMany({
+    where: and(
+      eq(agentDocuments.userId, userId),
+      eq(agentDocuments.characterId, characterId),
+      notInArray(agentDocuments.sourceType, ["web_search", "web_fetch"])
+    ),
+    orderBy: desc(agentDocuments.createdAt),
+    limit,
+  });
+}
+
+export async function listReadyAgentDocumentsForCharacter(
+  userId: string,
+  characterId: string,
+  limit = 100
+): Promise<AgentDocument[]> {
+  return db.query.agentDocuments.findMany({
+    where: and(
+      eq(agentDocuments.userId, userId),
+      eq(agentDocuments.characterId, characterId),
+      eq(agentDocuments.status, "ready"),
+      notInArray(agentDocuments.sourceType, ["web_search", "web_fetch"])
+    ),
+    orderBy: desc(agentDocuments.createdAt),
+    limit,
+  });
+}
+
+/**
+ * Find a Knowledge Base document by filename or title for a specific agent.
+ * Used by readFile tool to support reading KB documents in addition to synced folders.
+ *
+ * Matches are case-insensitive and support partial matching for flexibility.
+ * Priority: exact originalFilename > exact title > partial originalFilename > partial title
+ */
+export async function findAgentDocumentByName(
+  characterId: string,
+  searchName: string
+): Promise<AgentDocument | null> {
+  // Normalize the search name (remove path if present, lowercase for comparison)
+  const normalizedName = searchName.split(/[/\\]/).pop()?.toLowerCase() || searchName.toLowerCase();
+
+  // First, try to find documents for this character that are ready
+  const documents = await db.query.agentDocuments.findMany({
+    where: and(
+      eq(agentDocuments.characterId, characterId),
+      eq(agentDocuments.status, "ready"),
+      notInArray(agentDocuments.sourceType, ["web_search", "web_fetch"])
+    ),
+    orderBy: desc(agentDocuments.createdAt),
+    limit: 100,
+  });
+
+  if (!documents.length) return null;
+
+  // Score each document for match quality
+  let bestMatch: AgentDocument | null = null;
+  let bestScore = 0;
+
+  for (const doc of documents) {
+    const filename = doc.originalFilename.toLowerCase();
+    const title = doc.title?.toLowerCase() || "";
+
+    let score = 0;
+
+    // Exact matches (highest priority)
+    if (filename === normalizedName) {
+      score = 100;
+    } else if (title === normalizedName) {
+      score = 90;
+    }
+    // Partial matches
+    else if (filename.includes(normalizedName) || normalizedName.includes(filename)) {
+      score = 70;
+    } else if (title && (title.includes(normalizedName) || normalizedName.includes(title))) {
+      score = 60;
+    }
+    // Extension-stripped matching (e.g., "report" matches "report.pdf")
+    else {
+      const filenameNoExt = filename.replace(/\.[^/.]+$/, "");
+      const searchNoExt = normalizedName.replace(/\.[^/.]+$/, "");
+
+      if (filenameNoExt === searchNoExt) {
+        score = 85;
+      } else if (filenameNoExt.includes(searchNoExt) || searchNoExt.includes(filenameNoExt)) {
+        score = 50;
+      }
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = doc;
+    }
+  }
+
+  return bestMatch;
+}
+
+export async function updateAgentDocument(
+  id: string,
+  userId: string,
+  data: Partial<NewAgentDocument>
+): Promise<AgentDocument | null> {
+  const [document] = await db
+    .update(agentDocuments)
+    .set({ ...data, updatedAt: new Date().toISOString() })
+    .where(and(eq(agentDocuments.id, id), eq(agentDocuments.userId, userId)))
+    .returning();
+  return document ?? null;
+}
+
+export async function deleteAgentDocument(id: string, userId: string): Promise<void> {
+  await db
+    .delete(agentDocuments)
+    .where(and(eq(agentDocuments.id, id), eq(agentDocuments.userId, userId)));
+}
+
+export async function getExpiredAgentDocuments(): Promise<AgentDocument[]> {
+  const now = new Date().toISOString();
+  return db.select()
+    .from(agentDocuments)
+    .where(
+      sql`json_extract(${agentDocuments.metadata}, '$.expiresAt') < ${now}`
+    );
+}
+
+export async function createAgentDocumentChunks(
+  chunks: NewAgentDocumentChunk[]
+): Promise<AgentDocumentChunk[]> {
+  if (chunks.length === 0) return [];
+  const inserted = await db
+    .insert(agentDocumentChunks)
+    .values(chunks)
+    .returning();
+  return inserted;
+}
+
+export async function deleteAgentDocumentChunksByDocumentId(
+  documentId: string,
+  userId: string
+): Promise<void> {
+  await db
+    .delete(agentDocumentChunks)
+    .where(
+      and(
+        eq(agentDocumentChunks.documentId, documentId),
+        eq(agentDocumentChunks.userId, userId)
+      )
+    );
+}
+
+export async function getAgentDocumentChunksByDocumentId(
+  documentId: string,
+  userId: string
+): Promise<AgentDocumentChunk[]> {
+  return db.query.agentDocumentChunks.findMany({
+    where: and(
+      eq(agentDocumentChunks.documentId, documentId),
+      eq(agentDocumentChunks.userId, userId)
+    ),
+    orderBy: [asc(agentDocumentChunks.chunkIndex)],
+  });
+}
+
+export async function listAgentDocumentChunksForCharacter(
+  userId: string,
+  characterId: string,
+  limit = 1000
+): Promise<AgentDocumentChunk[]> {
+  return db.query.agentDocumentChunks.findMany({
+    where: and(
+      eq(agentDocumentChunks.userId, userId),
+      eq(agentDocumentChunks.characterId, characterId)
+    ),
+    orderBy: [asc(agentDocumentChunks.documentId), asc(agentDocumentChunks.chunkIndex)],
+    limit,
+  });
+}

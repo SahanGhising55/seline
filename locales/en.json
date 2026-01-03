@@ -1,0 +1,1086 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "back": "Back",
+    "goBack": "Go back to previous page",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "error": "An error occurred. Please try again.",
+    "retry": "Retry",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password"
+  },
+  "layout": {
+    "brandShort": "S",
+    "brand": "Seline",
+    "homeAria": "Seline Home",
+    "sidebar": {
+      "usage": "Usage & Analytics",
+      "settings": "Settings",
+      "about": "About",
+      "signOut": "Sign out",
+      "expand": "Expand sidebar",
+      "collapse": "Collapse sidebar"
+    }
+  },
+  "authLayout": {
+    "logoShort": "S",
+    "logo": "Seline"
+  },
+  "login": {
+    "title": "Welcome back",
+    "subtitle": "Sign in to your account",
+    "email": "Email",
+    "password": "Password",
+    "placeholderEmail": "you@example.com",
+    "placeholderPassword": "••••••••",
+    "signingIn": "Signing in...",
+    "signIn": "Sign in",
+    "error": "Login failed",
+    "cta": "Don't have an account?",
+    "ctaLink": "Create one"
+  },
+  "signup": {
+    "titleFirst": "Welcome to Seline",
+    "title": "Create an account",
+    "subtitleFirst": "Set up your first account to get started",
+    "subtitle": "Sign up to start creating",
+    "passwordHint": "Must be at least 6 characters",
+    "creating": "Creating account...",
+    "create": "Create account",
+    "errorShort": "Registration failed",
+    "cta": "Already have an account?",
+    "ctaLink": "Sign in",
+    "firstUser": "You're the first user! This account will be created locally.",
+    "errorPasswordLength": "Password must be at least 6 characters",
+    "errorPasswordMatch": "Passwords do not match",
+    "placeholderEmail": "you@example.com",
+    "placeholderPassword": "••••••••"
+  },
+  "picker": {
+    "title": "Choose an Agent",
+    "subtitle": "Select an agent to start chatting, or create a new one",
+    "create": "Create New Agent",
+    "createDescription": "Configure your own AI agent",
+    "continue": "Continue",
+    "startNew": "Start new chat",
+    "folders": "Folders",
+    "configureTools": "Configure tools",
+    "toolsEnabled": "{count, plural, one {# tool enabled} other {# tools enabled}}",
+    "empty": "No agents yet. Configure your first agent to get started.",
+    "emptyTitle": "Create Your First Agent",
+    "emptyDescription": "Agents are AI assistants tailored to specific tasks. Create one to get started with personalized help.",
+    "searchPlaceholder": "Search agents by name, purpose, or tools...",
+    "noResults": "No agents match your search",
+    "clearSearch": "Clear search",
+    "vectorTitle": "Vector Search Folders",
+    "toolEditor": {
+      "subtitle": "{name} • {count} tools enabled",
+      "searchPlaceholder": "Search tools...",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "noResults": "No tools match \"{query}\"",
+      "footerCount": "{selected} of {total} tools enabled",
+      "categories": {
+        "knowledge": "Knowledge & Files",
+        "search": "Web & Search",
+        "image-generation": "Image Generation",
+        "image-editing": "Image Editing",
+        "video-generation": "Video Generation",
+        "analysis": "Analysis",
+        "utility": "Utility"
+      }
+    },
+    "tools": {
+      "docsSearch": {
+        "name": "Document Search",
+        "description": "Search agent's knowledge base"
+      },
+      "vectorSearch": {
+        "name": "Vector Search",
+        "description": "Semantic search across indexed folders"
+      },
+      "readFile": {
+        "name": "Read File",
+        "description": "Read full file content from synced folders"
+      },
+      "localGrep": {
+        "name": "Local Grep",
+        "description": "Fast exact/regex pattern search with ripgrep"
+      },
+      "webSearch": {
+        "name": "Web Search",
+        "description": "Search the web for URLs"
+      },
+      "webBrowse": {
+        "name": "Web Browse",
+        "description": "Fetch and analyze web pages with AI synthesis"
+      },
+      "webQuery": {
+        "name": "Web Query",
+        "description": "Query previously fetched web content"
+      },
+      "firecrawlCrawl": {
+        "name": "Crawl Website",
+        "description": "Crawl multiple pages from a website"
+      },
+      "generateImageFlux2": {
+        "name": "Image Generation (Flux2)",
+        "description": "Generate images from text"
+      },
+      "generateImageWan22": {
+        "name": "Image Generation (WAN)",
+        "description": "Generate anime-style images"
+      },
+      "editImage": {
+        "name": "Image Editor (Gemini)",
+        "description": "Edit images, create variations, combine images"
+      },
+      "generateVideoWan22": {
+        "name": "Video Generation",
+        "description": "Animate images into videos"
+      },
+      "generatePixelVideoWan22": {
+        "name": "Pixel Animation (WAN 2.2)",
+        "description": "Generate pixel art sprite animations"
+      },
+      "assembleVideo": {
+        "name": "Video Assembly",
+        "description": "Assemble images/videos into edited videos"
+      },
+      "describeImage": {
+        "name": "Describe Image",
+        "description": "Analyze and describe images"
+      },
+      "showProductImages": {
+        "name": "Product Gallery",
+        "description": "Display products with images and purchase links"
+      },
+      "generateImageFlux2Flex": {
+        "name": "Generate (Flux.2 Flex)",
+        "description": "Generate images with Flux.2 Flex via OpenRouter"
+      },
+      "editImageFlux2Flex": {
+        "name": "Edit (Flux.2 Flex)",
+        "description": "Edit one or more images with Flux.2 Flex via OpenRouter"
+      },
+      "referenceImageFlux2Flex": {
+        "name": "Reference (Flux.2 Flex)",
+        "description": "Style-guided generation with multiple reference images"
+      },
+      "generateImageGpt5Mini": {
+        "name": "Generate (GPT-5 Mini)",
+        "description": "Fast image generation with GPT-5 Mini"
+      },
+      "editImageGpt5Mini": {
+        "name": "Edit (GPT-5 Mini)",
+        "description": "Quick editing of one or more images with GPT-5 Mini"
+      },
+      "referenceImageGpt5Mini": {
+        "name": "Reference (GPT-5 Mini)",
+        "description": "Reference-guided generation with multiple images"
+      },
+      "generateImageGpt5": {
+        "name": "Generate (GPT-5)",
+        "description": "Premium image generation with GPT-5"
+      },
+      "editImageGpt5": {
+        "name": "Edit (GPT-5)",
+        "description": "Premium editing of one or more images with GPT-5"
+      },
+      "referenceImageGpt5": {
+        "name": "Reference (GPT-5)",
+        "description": "Premium style transfer with multiple reference images"
+      },
+      "generateImageGemini25Flash": {
+        "name": "Generate (Gemini 2.5 Flash)",
+        "description": "Fast generation with Gemini 2.5 Flash"
+      },
+      "editImageGemini25Flash": {
+        "name": "Edit (Gemini 2.5 Flash)",
+        "description": "Fast editing of one or more images with Gemini 2.5 Flash"
+      },
+      "referenceImageGemini25Flash": {
+        "name": "Reference (Gemini 2.5 Flash)",
+        "description": "Reference-guided with multiple images"
+      },
+      "generateImageGemini3Pro": {
+        "name": "Generate (Gemini 3 Pro)",
+        "description": "Advanced generation with Gemini 3 Pro"
+      },
+      "editImageGemini3Pro": {
+        "name": "Edit (Gemini 3 Pro)",
+        "description": "Advanced editing of one or more images with Gemini 3 Pro"
+      },
+      "referenceImageGemini3Pro": {
+        "name": "Reference (Gemini 3 Pro)",
+        "description": "Advanced style transfer with multiple reference images"
+      }
+    }
+  },
+  "avatar": {
+    "dialog": {
+      "title": "Avatar for {name}",
+      "subtitle": "Select an existing image or upload a new avatar"
+    },
+    "error": {
+      "fetch": "Failed to fetch images",
+      "load": "Failed to load images",
+      "upload": "Upload failed",
+      "invalidType": "Please upload a PNG, JPEG, or WebP image",
+      "tooLarge": "Image must be less than 10MB",
+      "setPrimary": "Failed to set primary",
+      "delete": "Failed to delete"
+    },
+    "empty": "No images yet. Upload one below.",
+    "actions": {
+      "upload": "Upload New Avatar",
+      "uploading": "Uploading..."
+    },
+    "delete": "Delete",
+    "note": "PNG, JPEG, or WebP · Max 10MB"
+  },
+  "documents": {
+    "title": "Knowledge Base",
+    "add": "Add Documents",
+    "empty": "No documents uploaded",
+    "status": {
+      "processing": "Processing...",
+      "failed": "Failed"
+    },
+    "error": {
+      "fetch": "Failed to load documents",
+      "upload": "Upload failed",
+      "delete": "Delete failed"
+    },
+    "delete": "Remove document",
+    "type": {
+      "pdf": "PDF",
+      "txt": "TXT",
+      "md": "MD",
+      "html": "HTML"
+    },
+    "units": {
+      "bytes": "B",
+      "kb": "KB",
+      "mb": "MB"
+    }
+  },
+  "assistant": {
+    "processingTool": "Processing tool response...",
+    "uploadError": "Failed to upload file"
+  },
+  "assistantUi": {
+    "welcome": {
+      "start": "How can I help you today?"
+    },
+    "composer": {
+      "placeholderDefault": "What's on your mind?",
+      "placeholderQueue": "Type to queue message...",
+      "placeholderResearch": "Enter your research question...",
+      "editPlaceholder": "Edit your message...",
+      "cancel": "Cancel",
+      "save": "Save",
+      "stop": "Stop"
+    },
+    "queue": {
+      "messagesQueued": "{count} message{count, plural, one {} other {s}} queued"
+    },
+    "enhance": {
+      "minChars": "Please enter at least 3 characters to enhance",
+      "selectAgent": "Select an agent with synced folders to use enhancement",
+      "failed": "Failed to enhance prompt",
+      "skipped": "Could not enhance prompt",
+      "success": "Enhanced with {files} files ({chunks} chunks){llmIndicator}",
+      "tooltipEnhanced": "Enhanced with {files} files - click Send to use",
+      "tooltipDefault": "Enhance with context from synced folders"
+    },
+    "deepResearch": {
+      "modeLabel": "Deep Research Mode",
+      "enable": "Enable Deep Research",
+      "disable": "Disable Deep Research"
+    },
+    "tooltips": {
+      "addImage": "Add image",
+      "sendMessage": "Send message",
+      "queueMessage": "Queue message",
+      "stopResponse": "Stop response",
+      "startResearch": "Start Research",
+      "edit": "Edit",
+      "copy": "Copy",
+      "regenerate": "Regenerate"
+    },
+    "toast": {
+      "copied": "Message copied to clipboard"
+    },
+    "deepResearchPanel": {
+      "title": "Deep Research",
+      "cancel": "Cancel",
+      "newResearch": "New Research",
+      "searchingPrefix": "Searching:",
+      "sourcesFound": "{count} sources found",
+      "citations": "{count} citations",
+      "phases": {
+        "idle": "Ready",
+        "planning": "Planning",
+        "searching": "Searching",
+        "analyzing": "Analyzing",
+        "drafting": "Drafting",
+        "refining": "Refining",
+        "finalizing": "Finalizing",
+        "complete": "Complete",
+        "error": "Error"
+      }
+    },
+    "tools": {
+      "searchTools": "Tool Search",
+      "listAllTools": "List Tools",
+      "webSearch": "Web Search",
+      "webBrowse": "Web Browse",
+      "webQuery": "Web Query",
+      "firecrawlCrawl": "Crawl Website",
+      "vectorSearch": "Vector Search",
+      "docsSearch": "Document Search",
+      "readFile": "Read File",
+      "localGrep": "Local Grep",
+      "editImage": "Image Editor",
+      "describeImage": "Image Analysis",
+      "generateImageFlux2": "Flux2 Image Generation",
+      "generateImageWan22": "WAN 2.2 Image Generation",
+      "generateVideoWan22": "WAN 2.2 Video Generation",
+      "generatePixelVideoWan22": "WAN 2.2 Pixel Animation",
+      "assembleVideo": "Video Assembly",
+      "showProductImages": "Product Gallery"
+    }
+  },
+  "folderSync": {
+    "loading": "Loading folders...",
+    "dismiss": "Dismiss",
+    "files": "Files:",
+    "chunks": "Chunks:",
+    "recursive": "Recursive:",
+    "yes": "Yes",
+    "no": "No",
+    "lastSynced": "Last Synced:",
+    "never": "Never",
+    "error": "Error:",
+    "noFolders": "No folders indexed yet",
+    "noFoldersDescription": "Add folders to enable vector search for this agent",
+    "folderPath": "Folder Path",
+    "folderPathPlaceholder": "Enter full folder path (e.g., /Users/you/Documents/project)",
+    "folderPathTip": "Tip: Copy the folder path from Finder (Cmd+Option+C) or Terminal",
+    "analyzing": "Analyzing folder...",
+    "filesToIndex": "files to index",
+    "ignorePatternsDetected": "ignore patterns detected",
+    "largeFilesWillBeSkipped": "large file(s) over 3000 lines will be skipped",
+    "verifyLater": "You can still add this folder - it will be verified when syncing.",
+    "displayName": "Display Name (optional)",
+    "displayNamePlaceholder": "My Documents",
+    "includeSubfolders": "Include subfolders (recursive)",
+    "advancedOptions": "Advanced Options",
+    "fileExtensions": "File Extensions (comma-separated)",
+    "excludePatterns": "Exclude Patterns (auto-detected from .gitignore)",
+    "patternsIncluded": "✓ Patterns from .gitignore included",
+    "cancel": "Cancel",
+    "addFolder": "Add Folder",
+    "addFolderToIndex": "Add Folder to Index",
+    "formTitle": "Add New Folder",
+    "notYetAdded": "Not saved yet",
+    "stepEnterPath": "Enter path",
+    "stepClickAdd": "Click Add Folder",
+    "clickAddReminder": "Click \"Add Folder\" to save this folder to the index",
+    "reindexAll": "Reindex All",
+    "reindexing": "Reindexing...",
+    "reindexConfirm": "This will rebuild the index for all folders and may take a while. Continue?",
+    "reindexHint": "Use after enabling V2 to rebuild lexical vectors."
+  },
+  "vectorSearchPhase": {
+    "idle": "Ready",
+    "analyzing": "Analyzing query...",
+    "analyzingShort": "Analyzing",
+    "searching": "Searching files...",
+    "searchingShort": "Searching",
+    "synthesizing": "Synthesizing results...",
+    "synthesizingShort": "Synthesizing",
+    "complete": "Complete",
+    "error": "Error"
+  },
+  "syncIndicator": {
+    "syncing": "Syncing Vector DB",
+    "reindexing": "Reindexing...",
+    "filesIndexed": "files indexed",
+    "chunks": "chunks",
+    "pending": "Pending",
+    "complete": "Sync complete",
+    "error": "Sync failed",
+    "recentErrors": "Recent errors:",
+    "cancel": "Cancel",
+    "dismiss": "Dismiss",
+    "expand": "Show details",
+    "collapse": "Hide details",
+    "clearStuck": "Clear Stuck Syncs",
+    "clearing": "Clearing..."
+  },
+  "characterCreation": {
+    "progress": {
+      "intro": "Start",
+      "identity": "Identity",
+      "capabilities": "Capabilities",
+      "knowledge": "Knowledge",
+      "vectorSearch": "Vector Search",
+      "preview": "Preview"
+    },
+    "intro": {
+      "subtitle": "Configure a focused AI agent for your work or projects",
+      "guidedCreation": "GUIDED CREATION",
+      "or": "or",
+      "quickCreate": "QUICK CREATE",
+      "quickPrompt": "Describe your agent's role or purpose in one sentence:",
+      "quickPlaceholder": "Customer support agent for our SaaS product that answers FAQs and drafts replies.",
+      "back": "← Back",
+      "generate": "GENERATE"
+    },
+    "name": {
+      "question": "What shall we call your agent?",
+      "label": "Enter agent name:",
+      "placeholder": "Type a name...",
+      "errorMinLength": "Name must be at least 2 characters",
+      "errorMaxLength": "Name must be less than 50 characters",
+      "escToGoBack": "← ESC to go back",
+      "continue": "Continue →"
+    },
+    "concept": {
+      "question": "Describe your agent's role, domain, and personality...",
+      "label": "Agent concept (role, domain, and how it should help you):",
+      "placeholder": "e.g., A wise mentor who guides heroes on their journey...",
+      "examplesLabel": "// Examples:",
+      "example1": "Customer support agent that answers FAQs and drafts email replies",
+      "example2": "Product research assistant that summarizes user interviews and feature requests",
+      "example3": "Technical writing agent that explains APIs in clear, simple language",
+      "errorMinLength": "Please describe your agent in at least 10 characters",
+      "errorMaxLength": "Concept must be less than 500 characters",
+      "back": "← Back",
+      "cmdEnter": "⌘+Enter to submit",
+      "continue": "Continue →"
+    },
+    "identity": {
+      "question": "Define your agent's identity and purpose...",
+      "nameLabel": "Agent Name *",
+      "namePlaceholder": "e.g., Support Assistant",
+      "taglineLabel": "Tagline (optional)",
+      "taglinePlaceholder": "e.g., Your 24/7 customer support companion",
+      "purposeLabel": "Purpose & Responsibilities *",
+      "purposePlaceholder": "Describe what this agent does, its domain expertise, and how it should help users...",
+      "errorNameMin": "Name must be at least 2 characters",
+      "errorNameMax": "Name must be less than 50 characters",
+      "errorTaglineMax": "Tagline must be less than 100 characters",
+      "errorPurposeMin": "Please describe the agent's purpose in at least 10 characters",
+      "errorPurposeMax": "Purpose must be less than 1000 characters",
+      "back": "← Back",
+      "continue": "Continue →"
+    },
+    "capabilities": {
+      "question": "Select the tools this agent can use...",
+      "categories": {
+        "knowledge": "Knowledge & Documents",
+        "search": "Web Search",
+        "imageGeneration": "Image Generation",
+        "imageEditing": "Image Editing",
+        "videoGeneration": "Video Generation",
+        "analysis": "Image Analysis",
+        "utility": "Utility & Display"
+      },
+      "tools": {
+        "docsSearch": "Document Search",
+        "docsSearchDesc": "Search agent's knowledge base and attached documents",
+        "vectorSearch": "Vector Search",
+        "vectorSearchDesc": "Semantic search across indexed folders",
+        "readFile": "Read File",
+        "readFileDesc": "Read full file content from synced folders",
+        "localGrep": "Local Grep",
+        "localGrepDesc": "Fast exact/regex pattern search using ripgrep",
+        "webSearch": "Web Search",
+        "webSearchDesc": "Search the web for URLs and information",
+        "webBrowse": "Web Browse",
+        "webBrowseDesc": "Fetch and analyze web pages with AI synthesis",
+        "webQuery": "Web Query",
+        "webQueryDesc": "Query previously fetched web content",
+        "firecrawlCrawl": "Crawl Website",
+        "firecrawlCrawlDesc": "Crawl multiple pages from a website",
+        "generateImageFlux2": "Image Generation (Flux2)",
+        "generateImageFlux2Desc": "Generate images from text descriptions",
+        "generateImageWan22": "Image Generation (WAN 2.2)",
+        "generateImageWan22Desc": "Generate anime-style or artistic images",
+        "editRoomImage": "Image Editor (Gemini)",
+        "editRoomImageDesc": "Edit images, create variations, combine elements from two images",
+        "generateVideoWan22": "Video Generation",
+        "generateVideoWan22Desc": "Animate images into short videos",
+        "generatePixelVideoWan22": "Pixel Animation (WAN 2.2)",
+        "generatePixelVideoWan22Desc": "Generate pixel art character sprite animations",
+        "assembleVideo": "Video Assembly",
+        "assembleVideoDesc": "Assemble session images/videos into edited videos",
+        "describeImage": "Describe Image",
+        "describeImageDesc": "Analyze and describe images using AI vision",
+        "showProductImages": "Product Gallery",
+        "showProductImagesDesc": "Display products with images and purchase links for shopping queries",
+        "generateImageFlux2Flex": "Generate (Flux.2 Flex)",
+        "generateImageFlux2FlexDesc": "Generate images using Flux.2 Flex via OpenRouter",
+        "editImageFlux2Flex": "Edit (Flux.2 Flex)",
+        "editImageFlux2FlexDesc": "Edit one or more images using Flux.2 Flex via OpenRouter",
+        "referenceImageFlux2Flex": "Reference (Flux.2 Flex)",
+        "referenceImageFlux2FlexDesc": "Style-guided generation with multiple reference images",
+        "generateImageGpt5Mini": "Generate (GPT-5 Mini)",
+        "generateImageGpt5MiniDesc": "Fast image generation with GPT-5 Mini",
+        "editImageGpt5Mini": "Edit (GPT-5 Mini)",
+        "editImageGpt5MiniDesc": "Quick editing of one or more images with GPT-5 Mini",
+        "referenceImageGpt5Mini": "Reference (GPT-5 Mini)",
+        "referenceImageGpt5MiniDesc": "Reference-guided generation with multiple images",
+        "generateImageGpt5": "Generate (GPT-5)",
+        "generateImageGpt5Desc": "Premium quality image generation with GPT-5",
+        "editImageGpt5": "Edit (GPT-5)",
+        "editImageGpt5Desc": "Premium editing of one or more images with GPT-5",
+        "referenceImageGpt5": "Reference (GPT-5)",
+        "referenceImageGpt5Desc": "Premium style transfer with multiple reference images",
+        "generateImageGemini25Flash": "Generate (Gemini 2.5 Flash)",
+        "generateImageGemini25FlashDesc": "Fast generation with Gemini 2.5 Flash",
+        "editImageGemini25Flash": "Edit (Gemini 2.5 Flash)",
+        "editImageGemini25FlashDesc": "Fast editing of one or more images with Gemini 2.5 Flash",
+        "referenceImageGemini25Flash": "Reference (Gemini 2.5 Flash)",
+        "referenceImageGemini25FlashDesc": "Reference-guided generation with multiple images",
+        "generateImageGemini3Pro": "Generate (Gemini 3 Pro)",
+        "generateImageGemini3ProDesc": "Advanced generation with Gemini 3 Pro",
+        "editImageGemini3Pro": "Edit (Gemini 3 Pro)",
+        "editImageGemini3ProDesc": "Advanced editing of one or more images with Gemini 3 Pro",
+        "referenceImageGemini3Pro": "Reference (Gemini 3 Pro)",
+        "referenceImageGemini3ProDesc": "Advanced style transfer with multiple reference images"
+      },
+      "back": "← Back",
+      "continue": "Continue →"
+    },
+    "style": {
+      "question": "Choose a visual style for your agent...",
+      "selectStyle": "Select style (1-{count}):",
+      "styles": {
+        "anime": "Anime",
+        "animeDesc": "Japanese animation style",
+        "realistic": "Realistic",
+        "realisticDesc": "Photorealistic look",
+        "cartoon": "Cartoon",
+        "cartoonDesc": "Western cartoon style",
+        "fantasy": "Fantasy",
+        "fantasyDesc": "Magical & ethereal",
+        "scifi": "Sci-Fi",
+        "scifiDesc": "Futuristic & tech",
+        "pixel": "Pixel Art",
+        "pixelDesc": "Retro pixel style"
+      },
+      "back": "← Back",
+      "generateCharacter": "Generate Character →"
+    },
+    "knowledgeBase": {
+      "question": "Upload documents to build the agent's knowledge base...",
+      "uploading": "Uploading...",
+      "clickToUpload": "Click to upload",
+      "orDragFiles": "or drag files here",
+      "supportedFormats": "Supports PDF, TXT, Markdown, HTML",
+      "uploadedDocuments": "Uploaded Documents",
+      "skipHint": "You can skip this step and add documents later",
+      "back": "← Back",
+      "continue": "Continue →",
+      "skip": "Skip →"
+    },
+    "vectorSearchPage": {
+      "step": "Step 4",
+      "title": "Vector Search",
+      "description": "Add folders for {agentName} to search",
+      "back": "Back",
+      "skip": "Skip",
+      "continue": "Continue"
+    },
+    "preview": {
+      "purpose": "Purpose",
+      "capabilities": "Capabilities",
+      "noToolsEnabled": "No tools enabled",
+      "knowledgeBase": "Knowledge Base",
+      "documentsAttached": "{count} document attached",
+      "documentsAttachedPlural": "{count} documents attached",
+      "moreDocuments": "+{count} more",
+      "noDocuments": "No documents attached",
+      "configSummary": "Configuration Summary",
+      "toolsEnabled": "Tools: {count} enabled",
+      "documentsCount": "Documents: {count} attached",
+      "readyToDeploy": "Ready to deploy",
+      "back": "← Back",
+      "creating": "Creating...",
+      "createAgent": "Create Agent ✓"
+    },
+    "loading": {
+      "title": "Configuring agent {name}...",
+      "messages": {
+        "initializingProfile": "Initializing agent profile...",
+        "configuringCapabilities": "Configuring capabilities...",
+        "settingUpKnowledgeBase": "Setting up knowledge base...",
+        "applyingToolPermissions": "Applying tool permissions...",
+        "validatingConfiguration": "Validating configuration...",
+        "finalizingSetup": "Finalizing agent setup..."
+      }
+    },
+    "success": {
+      "title": "{name} is Ready!",
+      "subtitle": "Your agent has been created successfully.",
+      "complete": "COMPLETE",
+      "startChatting": "Start Chatting",
+      "configureAnother": "Configure Another Agent",
+      "myAgents": "My Agents",
+      "agentId": "Agent ID"
+    },
+    "avatarEdit": {
+      "title": "Avatar for {name}",
+      "subtitle": "Review and customize your agent's avatar",
+      "seed": "Seed: {seed}",
+      "customUpload": "Custom Upload",
+      "imagePrompt": "Image Prompt",
+      "promptPlaceholder": "Describe how this agent should look (professional, neutral, playful, etc.)...",
+      "promptHint": "Edit the prompt and regenerate to customize the avatar",
+      "regenerateNewSeed": "Regenerate (New Seed)",
+      "regenerateSameSeed": "Regenerate (Same Seed)",
+      "or": "or",
+      "uploadYourOwn": "Upload Your Own Image",
+      "uploading": "Uploading...",
+      "supportedFormats": "PNG, JPEG, or WebP • Max 10MB",
+      "errors": {
+        "invalidFormat": "Please upload a PNG, JPEG, or WebP image",
+        "fileTooLarge": "Image must be less than 10MB"
+      },
+      "back": "Back",
+      "continueWithAvatar": "Continue with this Avatar"
+    }
+  },
+  "errors": {
+    "notFound": "Not found",
+    "forbidden": "You don't have access to this resource",
+    "generic": "Something went wrong. Please try again.",
+    "genericRefresh": "Something went wrong. Please refresh the page."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure your application",
+    "save": {
+      "cta": "Save Changes",
+      "saving": "Saving...",
+      "saved": "Saved!"
+    },
+    "nav": {
+      "apiKeys": "API Keys",
+      "models": "Models",
+      "vectorSearch": "Vector Search",
+      "preferences": "Preferences"
+    },
+    "errors": {
+      "load": "Failed to load settings",
+      "save": "Failed to save settings"
+    },
+    "api": {
+      "title": "LLM Provider",
+      "anthropic": "Anthropic (Claude)",
+      "openrouter": "OpenRouter",
+      "keysTitle": "API Keys",
+      "fields": {
+        "anthropic": {
+          "label": "Anthropic API Key",
+          "placeholder": "sk-ant-...",
+          "helper": "Required for Claude models"
+        },
+        "openrouter": {
+          "label": "OpenRouter API Key",
+          "placeholder": "sk-or-...",
+          "helper": "Alternative LLM provider & embeddings"
+        },
+        "tavily": {
+          "label": "Tavily API Key",
+          "placeholder": "tvly-...",
+          "helper": "Required for Deep Research web search"
+        },
+        "webScraperProvider": {
+          "label": "Web Scraping Provider",
+          "helper": "Choose local scraping (bundled with the app) or Firecrawl cloud API",
+          "options": {
+            "firecrawl": "Firecrawl (Cloud API)",
+            "local": "Local (Puppeteer)"
+          }
+        },
+        "firecrawl": {
+          "label": "Firecrawl API Key",
+          "placeholder": "fc-...",
+          "helper": "Required for web scraping with Firecrawl"
+        },
+        "seline": {
+          "label": "Seline AI API Key",
+          "placeholder": "Enter your Seline AI key",
+          "helper": "Required for image/video generation"
+        }
+      }
+    },
+    "models": {
+      "title": "Model Selection",
+      "subtitle": "Configure different models for different tasks. Leave empty to use provider defaults.",
+      "defaults": {
+        "label": "Defaults:",
+        "value": "Anthropic: claude-sonnet-4-5-20250929 | OpenRouter: x-ai/grok-4.1-fast"
+      },
+      "fields": {
+        "chat": {
+          "label": "Chat Model",
+          "helper": "Primary model for conversations. Examples: claude-sonnet-4-5-20250929, anthropic/claude-3.5-sonnet, openai/gpt-4o"
+        },
+        "research": {
+          "label": "Research Model",
+          "helper": "Model for Deep Research mode. Use a powerful model for best results."
+        },
+        "vision": {
+          "label": "Vision Model",
+          "helper": "Model for image analysis (must support vision). Examples: claude-sonnet-4-5-20250929, google/gemini-2.0-flash-001"
+        },
+        "utility": {
+          "label": "Utility Model",
+          "helper": "Fast/cheap model used for background tasks (e.g., prompt enhancement). Example: google/gemini-2.0-flash-lite-001"
+        },
+        "embeddingProvider": {
+          "label": "Embedding Provider",
+          "helper": "Choose between OpenRouter (cloud) or local models bundled with the app.",
+          "options": {
+            "openrouter": "OpenRouter (cloud)",
+            "local": "Local (offline)"
+          }
+        },
+        "embedding": {
+          "label": "Embedding Model",
+          "helper": "Model for document embeddings (via OpenRouter). Examples: text-embedding-3-small, text-embedding-3-large",
+          "helperLocal": "Select a Transformers.js model for local embeddings. Download required for first use.",
+          "placeholderOpenRouter": "text-embedding-3-small",
+          "placeholderLocal": "Xenova/bge-large-en-v1.5",
+          "download": "Download",
+          "downloaded": "Downloaded"
+        },
+        "embeddingLocalPath": {
+          "label": "Local Model Path",
+          "placeholder": "C:\\path\\to\\models",
+          "helper": "Directory containing model folders (e.g., C:\\models with Xenova/bge-large-en-v1.5 inside). Leave empty to allow cached downloads."
+        }
+      },
+      "tip": {
+        "title": "Tip:",
+        "body": "Use cheaper/faster models for embeddings and more powerful models for research. OpenRouter model IDs use the format: provider/model-name (e.g., anthropic/claude-3.5-sonnet)."
+      }
+    },
+    "vector": {
+      "title": "Vector Search (LanceDB)",
+      "subtitle": "Enable vector search to allow agents to search through indexed folders using semantic similarity. This uses LanceDB, an embedded vector database that runs locally.",
+      "enable": "Enable Vector Search",
+      "enabled": "Vector search is enabled. You can configure which folders to index for each agent in the agent's settings or during agent creation.",
+      "path": "Data is stored locally at:",
+      "reindexRequired": {
+        "title": "Reindex.",
+        "body": "Choose if you wanna force reindexing of all folders. Embedding settings changes. Reindex all synced folders to rebuild vectors with a new model.",
+        "cta": "Reindex All Now",
+        "running": "Reindexing..."
+      },
+      "v2": {
+        "title": "V2 Features",
+        "subtitle": "Enable hybrid search, token chunking, and tuning for improved retrieval quality.",
+        "enableHybrid": "Enable Hybrid Search (Dense + Lexical)",
+        "enableTokenChunking": "Enable Token Chunking",
+        "enableReranking": "Enable ONNX Reranking",
+        "enableQueryExpansion": "Enable Query Expansion",
+        "enableLlmSynthesis": "Enable LLM Synthesis",
+        "rollout": "V2 rollout percentage (0-100)",
+        "rrfK": "RRF k value",
+        "denseWeight": "Dense weight",
+        "lexicalWeight": "Lexical weight",
+        "tokenChunkSize": "Token chunk size",
+        "tokenChunkStride": "Token chunk stride",
+        "rerankTopK": "Rerank top K",
+        "rerankModel": "Rerank model path",
+        "maxFileLines": "Max file lines",
+        "maxFileLinesHelper": "Files exceeding this line count will be skipped during indexing (default: 3000)",
+        "maxLineLength": "Max line length",
+        "maxLineLengthHelper": "Files containing any line exceeding this character count will be skipped (checks for base64/massive strings, default: 1000)"
+      }
+    },
+    "preferences": {
+      "title": "Preferences",
+      "theme": {
+        "label": "Theme",
+        "dark": "Dark",
+        "light": "Light",
+        "system": "System"
+      },
+      "language": {
+        "label": "Language",
+        "en": "English",
+        "tr": "Türkçe"
+      },
+      "toolLoading": {
+        "label": "Tool Loading Mode",
+        "deferred": "Deferred Loading (Recommended)",
+        "deferredHelper": "Saves tokens. Agent discovers tools via searchTools when needed.",
+        "always": "Always Include",
+        "alwaysHelper": "All tools available immediately. Uses more tokens per request."
+      }
+    }
+  },
+  "about": {
+    "title": "About",
+    "subtitle": "Credits, support, and links",
+    "releasedBadge": "Released",
+    "headline": "Released and developed with the support of Styly",
+    "byline": "Created and maintained by Umut Tan",
+    "linkStyly": "https://styly.io",
+    "linkLinkedIn": "My LinkedIn",
+    "linkGitHub": "App GitHub"
+  },
+  "chat": {
+    "loading": "Loading chat...",
+    "empty": {
+      "description": "We couldn't load this agent chat. The agent may not exist or you may not have access."
+    },
+    "actions": {
+      "createAgent": "Create Agent",
+      "goHome": "Go Home"
+    },
+    "sidebar": {
+      "changeAvatar": "Click to change avatar",
+      "history": "Chat History",
+      "agentMemory": "Agent Memory",
+      "usage": "Usage & Analytics",
+      "startNew": "Start new chat",
+      "new": "New",
+      "empty": "No chat history yet",
+      "delete": "Delete chat"
+    },
+    "session": {
+      "untitled": "Untitled chat",
+      "invalid": "Invalid date",
+      "yesterday": "Yesterday"
+    }
+  },
+  "usage": {
+    "title": "Usage & Analytics",
+    "subtitle": "Track token usage, tool calls, and media generation for your chat sessions.",
+    "loading": "Loading usage...",
+    "cta": {
+      "observability": "Observability Dashboard"
+    },
+    "errors": {
+      "loadSessions": "Failed to load sessions"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "empty": "No sessions yet. Start a chat to see usage analytics.",
+      "untitled": "Untitled session",
+      "invalidDate": "Invalid date",
+      "select": "Select a session on the left to see detailed usage and analytics.",
+      "started": "Started {date}"
+    },
+    "analytics": {
+      "loading": "Computing session analytics...",
+      "cards": {
+        "tokens": {
+          "title": "Token usage",
+          "unit": "tokens",
+          "detail": "{input} input • {output} output"
+        },
+        "cost": {
+          "title": "Estimated cost (Claude Sonnet 4.5)",
+          "detail": "{input} input • {output} output"
+        },
+        "stats": {
+          "title": "Session stats",
+          "messages": "{count} messages",
+          "breakdown": "{assistant} assistant • {user} user",
+          "duration": "Duration ~{seconds}s"
+        }
+      },
+      "tools": {
+        "title": "Tools",
+        "total": "{count} calls",
+        "empty": "No tools were used in this session.",
+        "calls": "{count} calls",
+        "avg": "avg {ms} ms"
+      },
+      "media": {
+        "title": "Media generation",
+        "total": "{images} images • {videos} videos",
+        "empty": "No images or videos were generated in this session.",
+        "service": "{images} images • {videos} videos"
+      }
+    }
+  },
+  "memory": {
+    "pending": "Pending",
+    "auto": "Auto",
+    "manual": "Manual",
+    "importance": "Importance: {percent}%",
+    "showDetails": "Show details",
+    "hideDetails": "Hide details",
+    "reasoning": "Reasoning:",
+    "approve": "Approve",
+    "saveAndApprove": "Save & Approve",
+    "reject": "Reject",
+    "delete": "Delete",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "form": {
+      "title": "Add Memory",
+      "category": "Category",
+      "content": "Memory Content",
+      "placeholder": "e.g., User prefers 16:9 aspect ratio for all video content",
+      "hint": "Be specific and actionable. This will be injected into the agent's system prompt.",
+      "adding": "Adding...",
+      "add": "Add Memory"
+    },
+    "page": {
+      "title": "Agent Memory",
+      "addButton": "Add Memory",
+      "approved": "approved",
+      "pending": "pending",
+      "rejected": "rejected",
+      "filters": {
+        "all": "All",
+        "pending": "Pending",
+        "approved": "Approved"
+      },
+      "empty": {
+        "title": "No memories yet",
+        "pending": "No pending memories to review. Memories are automatically extracted from conversations.",
+        "approved": "No approved memories. Approve pending memories or add them manually.",
+        "all": "Memories are automatically extracted from conversations. You can also add them manually."
+      },
+      "viewAll": "View all memories",
+      "errors": {
+        "notFound": "Agent not found",
+        "forbidden": "You don't have access to this agent",
+        "loadFailed": "Failed to load agent"
+      },
+      "goHome": "Go Home"
+    },
+    "categories": {
+      "visual_preferences": {
+        "label": "Visual Preferences",
+        "description": "Colors, styles, aesthetics, aspect ratios, design preferences"
+      },
+      "communication_style": {
+        "label": "Communication Style",
+        "description": "Tone, formality, language preferences, response format"
+      },
+      "workflow_patterns": {
+        "label": "Workflow Patterns",
+        "description": "User habits, iteration patterns, tool sequences"
+      },
+      "domain_knowledge": {
+        "label": "Domain Knowledge",
+        "description": "Business facts, terminology, industry context"
+      },
+      "business_rules": {
+        "label": "Business Rules",
+        "description": "Requirements, constraints, brand guidelines, policies"
+      }
+    }
+  },
+  "admin": {
+    "observability": {
+      "title": "Observability Dashboard",
+      "subtitle": "Monitor agent runs, tool executions, and performance metrics",
+      "tabs": {
+        "runs": "Runs",
+        "analytics": "Analytics"
+      },
+      "status": {
+        "running": "Running",
+        "succeeded": "Succeeded",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      },
+      "runs": {
+        "filters": "Filters",
+        "refresh": "Refresh",
+        "searchPlaceholder": "Search session or user ID...",
+        "pipeline": "Pipeline",
+        "status": "Status",
+        "from": "From",
+        "to": "To",
+        "all": "All",
+        "clear": "Clear",
+        "noRunsFound": "No runs found",
+        "table": {
+          "status": "Status",
+          "pipeline": "Pipeline",
+          "started": "Started",
+          "duration": "Duration",
+          "tools": "Tools",
+          "tokens": "Tokens",
+          "session": "Session",
+          "actions": "Actions"
+        },
+        "viewDetails": "View Details",
+        "showing": "Showing {count} of {total} runs",
+        "page": "Page {current} of {total}"
+      },
+      "analytics": {
+        "period": "Period",
+        "last24Hours": "Last 24 hours",
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days",
+        "last90Days": "Last 90 days",
+        "refresh": "Refresh",
+        "totalRuns": "Total Runs",
+        "lastNDays": "Last {days} days",
+        "successRate": "Success Rate",
+        "succeeded": "{count} succeeded",
+        "failedRuns": "Failed Runs",
+        "totalFailures": "Total failures",
+        "avgDuration": "Avg Duration",
+        "perSuccessfulRun": "Per successful run",
+        "runsByPipeline": "Runs by Pipeline",
+        "noData": "No data",
+        "toolUsage": "Tool Usage",
+        "noToolCalls": "No tool calls recorded",
+        "calls": "{count} calls",
+        "avg": "avg {duration}",
+        "toolErrors": "Tool Errors",
+        "noErrors": "No tool errors 🎉",
+        "errors": "{count} errors",
+        "dailyTrends": "Daily Trends",
+        "failedToLoad": "Failed to load analytics"
+      },
+      "details": {
+        "backToDashboard": "Back to Dashboard",
+        "runId": "Run ID",
+        "exportJson": "Export JSON",
+        "runDetails": "Run Details",
+        "started": "Started",
+        "completed": "Completed",
+        "duration": "Duration",
+        "trigger": "Trigger",
+        "session": "Session",
+        "character": "Character",
+        "tokenUsage": "Token Usage",
+        "inputTokens": "Input Tokens",
+        "outputTokens": "Output Tokens",
+        "total": "Total",
+        "executionStats": "Execution Stats",
+        "messages": "Messages",
+        "steps": "Steps",
+        "toolCalls": "Tool Calls",
+        "toolEventsTimeline": "Tool Events Timeline ({count} events)",
+        "noToolEvents": "No tool events recorded",
+        "toolEventsWillAppear": "Tool executions will appear here",
+        "viewData": "View data ({count} fields)",
+        "runNotFound": "Run not found",
+        "failedToLoad": "Failed to load run"
+      }
+    }
+  }
+}

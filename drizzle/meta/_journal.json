@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1764444213522,
+      "tag": "0000_omniscient_sprite",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1764452002557,
+      "tag": "0001_lucky_luke_cage",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1764492521237,
+      "tag": "0002_absurd_stellaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1765741988534,
+      "tag": "0003_round_stellaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1767087395023,
+      "tag": "0004_glorious_genesis",
+      "breakpoints": true
+    }
+  ]
+}

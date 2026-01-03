@@ -1,0 +1,239 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Terminal Theme - Cream & Dark */
+    /* terminal-cream: #f5e6d3 = 34 63% 89% */
+    /* terminal-cream-dark: #e8d5b7 = 37 52% 81% */
+    /* terminal-dark: #1a1a1a = 0 0% 10% */
+    /* terminal-bg: #0a0a0a = 0 0% 4% */
+    /* terminal-green: #C2714F = 18 49% 54% (terracotta) */
+    /* terminal-amber: #ffb000 = 41 100% 50% */
+    /* terminal-text: #e0e0e0 = 0 0% 88% */
+    /* terminal-muted: #888888 = 0 0% 53% */
+    /* terminal-border: #333333 = 0 0% 20% */
+
+    --terminal-cream: 34 63% 89%;
+    --terminal-cream-dark: 37 52% 81%;
+    --terminal-dark: 0 0% 10%;
+    --terminal-bg: 0 0% 4%;
+    --terminal-green: 18 49% 54%;
+    --terminal-amber: 41 100% 50%;
+    --terminal-text: 0 0% 88%;
+    --terminal-muted: 0 0% 53%;
+    --terminal-border: 0 0% 20%;
+
+    --background: 32 55% 89%; /* terminal-cream */
+    --foreground: 0 0% 10%; /* terminal-dark */
+    --card: 32 55% 89%; /* terminal-cream */
+    --card-foreground: 0 0% 10%; /* terminal-dark */
+    --popover: 32 55% 89%; /* terminal-cream */
+    --popover-foreground: 0 0% 10%; /* terminal-dark */
+    --primary: 0 0% 10%; /* terminal-dark */
+    --primary-foreground: 32 55% 89%; /* terminal-cream */
+    --secondary: 32 40% 85%; /* lighter cream */
+    --secondary-foreground: 0 0% 10%; /* terminal-dark */
+    --muted: 32 30% 82%; /* muted cream */
+    --muted-foreground: 0 0% 53%; /* terminal-muted */
+    --accent: 18 49% 54%; /* terracotta */
+    --accent-foreground: 0 0% 100%; /* white for contrast */
+    --destructive: 0 84% 60%; /* red */
+    --destructive-foreground: 32 55% 89%; /* terminal-cream */
+    --border: 0 0% 75%; /* light border for light mode */
+    --input: 0 0% 75%; /* light input border */
+    --ring: 18 49% 54%; /* terracotta for focus */
+    --radius: 0.5rem;
+    --chart-1: 18 49% 54%; /* terracotta */
+    --chart-2: 41 100% 50%; /* terminal-amber */
+    --chart-3: 0 0% 53%; /* terminal-muted */
+    --chart-4: 32 55% 70%;
+    --chart-5: 0 0% 30%;
+  }
+
+  .dark {
+    --terminal-cream: 0 0% 10%;
+    --terminal-cream-dark: 0 0% 15%;
+    --terminal-dark: 34 63% 90%;
+    --terminal-bg: 0 0% 4%;
+    --terminal-green: 18 49% 54%;
+    --terminal-amber: 41 100% 50%;
+    --terminal-text: 0 0% 88%;
+    --terminal-muted: 0 0% 65%;
+    --terminal-border: 0 0% 25%;
+
+    --background: 0 0% 10%;
+    --foreground: 34 63% 90%;
+    --card: 0 0% 12%;
+    --card-foreground: 34 63% 90%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 34 63% 90%;
+    --primary: 34 63% 90%;
+    --primary-foreground: 0 0% 10%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 34 63% 90%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 18 49% 54%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 34 63% 90%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 18 49% 54%;
+    --chart-1: 18 49% 54%;
+    --chart-2: 41 100% 50%;
+    --chart-3: 0 0% 65%;
+    --chart-4: 34 63% 70%;
+    --chart-5: 0 0% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-transparent;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* assistant-ui custom styles */
+.aui-root {
+  --aui-thread-max-width: 80rem;
+}
+
+.aui-thread-viewport {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+}
+
+.aui-thread-viewport::-webkit-scrollbar {
+  width: 6px;
+}
+
+.aui-thread-viewport::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.aui-thread-viewport::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+/* Global scrollbar styling (Chromium + Firefox) */
+:root {
+  --scrollbar-track: hsl(var(--background) / 0.6);
+  --scrollbar-thumb: hsl(var(--foreground) / 0.28);
+  --scrollbar-thumb-hover: hsl(var(--foreground) / 0.45);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Image grid for generated images */
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  max-width: 100%;
+}
+
+.image-grid img {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.image-grid img:hover {
+  transform: scale(1.02);
+}
+
+/* Loading skeleton */
+.skeleton {
+  @apply animate-pulse bg-terminal-dark/10 rounded;
+}
+
+/* Shimmer animation for progress bar */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Character creation styles */
+.creation-card {
+  @apply bg-terminal-cream rounded-xl shadow-sm transition-all duration-300;
+}
+
+.creation-card:hover {
+  @apply shadow-md;
+}
+
+/* Smooth page transitions */
+.page-transition {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Glass effect */
+.glass {
+  @apply bg-terminal-cream/80 backdrop-blur-lg;
+}
+
+@layer utilities {
+  .dark .bg-white,
+  .dark .bg-white\/50,
+  .dark .bg-white\/70,
+  .dark .bg-white\/80,
+  .dark .bg-white\/90 {
+    background-color: hsl(var(--terminal-cream) / var(--tw-bg-opacity, 1));
+  }
+
+  .webkit-app-region-drag {
+    -webkit-app-region: drag;
+  }
+
+  .webkit-app-region-no-drag {
+    -webkit-app-region: no-drag;
+  }
+}

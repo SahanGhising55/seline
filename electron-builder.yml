@@ -1,0 +1,133 @@
+# Electron Builder Configuration for Seline
+# https://www.electron.build/configuration/configuration
+
+appId: "ai.zlutty.app"
+productName: "Seline"
+copyright: "Copyright © 2024-2025 Zlutty.AI"
+icon: "build-resources/icon.png"
+
+# Directories
+directories:
+  buildResources: "build-resources"
+  output: "dist-electron"
+
+# Files to include in the asar (only Electron main/preload)
+files:
+  - "electron-dist/**/*"
+  - "package.json"
+
+# Extra resources - these stay OUTSIDE the asar archive
+extraResources:
+  # Next.js standalone server (needs to be outside asar to spawn)
+  # Note: We explicitly include node_modules as electron-builder excludes it by default
+  - from: ".next/standalone"
+    to: "standalone"
+    filter:
+      - "**/*"
+      - "!**/node_modules"
+      - "!**/.local-data"
+      - "!**/drizzle"
+      - "!**/.cache"
+      - "!**/@remotion/studio"
+      - "!**/typescript"
+      - "!**/webpack"
+      - "!**/@xenova/transformers/node_modules/onnxruntime-node"
+      - "!**/@xenova/transformers/node_modules/onnxruntime-web"
+      - "!**/*.map"
+      - "!**/*.ts"
+      - "!**/test"
+      - "!**/tests"
+  # Standalone node_modules (explicitly included since it's excluded by default)
+  - from: ".next/standalone/node_modules"
+    to: "standalone/node_modules"
+    filter:
+      - "**/*"
+  # Static assets for Next.js
+  - from: ".next/static"
+    to: "standalone/.next/static"
+    filter:
+      - "**/*"
+  # Public folder (optional - we handle existence in preparation script)
+  - from: "public"
+    to: "standalone/public"
+    filter:
+      - "**/*"
+  # Local embedding models (optional, bundled outside asar for offline use)
+  - from: "models"
+    to: "models"
+    filter:
+      - "**/*"
+
+# Compression settings
+asar: true
+compression: "normal"
+
+# Disable npm rebuild - we handle this in electron:rebuild-standalone
+npmRebuild: false
+
+# macOS specific configuration
+mac:
+  category: "public.app-category.entertainment"
+  # icon: "build-resources/icon.icns"
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: "build-resources/entitlements.mac.plist"
+  entitlementsInherit: "build-resources/entitlements.mac.inherit.plist"
+  # Build only for current architecture by default (use CLI flags to override)
+  target:
+    - target: "dmg"
+    - target: "dir"
+  extendInfo:
+    NSCameraUsageDescription: "This app requires access to your camera for image capture."
+    NSMicrophoneUsageDescription: "This app requires access to your microphone for audio capture."
+
+# Windows specific configuration
+win:
+  target:
+    - target: "nsis"
+    - target: "portable"
+  # icon: "build-resources/icon.ico"
+  legalTrademarks: "Seline is a trademark of Seline"
+
+# NSIS installer settings
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: "Seline"
+  artifactName: "${productName}-Setup-${version}.${ext}"
+  uninstallDisplayName: "Seline"
+  deleteAppDataOnUninstall: false
+
+# DMG settings for macOS
+dmg:
+  sign: false
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: "link"
+      path: "/Applications"
+  window:
+    width: 540
+    height: 380
+
+# Notarization settings (for production releases)
+# Uncomment and configure for App Store / notarized releases
+# afterSign: "scripts/notarize.js"
+# notarize:
+#   teamId: "YOUR_TEAM_ID"
+
+# Publish configuration (for auto-updates)
+# publish:
+#   provider: "github"
+#   owner: "your-github-username"
+#   repo: "styly-agent"
+
+# Protocol registration (for deep linking)
+protocols:
+  - name: "zlutty"
+    schemes:
+      - "zlutty"

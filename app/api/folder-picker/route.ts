@@ -1,0 +1,160 @@
+import { NextRequest, NextResponse } from "next/server";
+import { readdir, readFile, stat } from "fs/promises";
+import { existsSync } from "fs";
+import { join, basename } from "path";
+
+/**
+ * Parse .gitignore-style patterns from a file
+ */
+function parseIgnorePatterns(content: string): string[] {
+  return content
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("#"))
+    .filter((line) => !line.startsWith("!")); // Skip negation patterns for simplicity
+}
+
+/**
+ * POST /api/folder-picker
+ * Analyzes a folder path and returns information about it,
+ * including detected ignore patterns and file count preview.
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { folderPath, includeExtensions, excludePatterns, recursive } = body;
+
+    if (!folderPath || typeof folderPath !== "string") {
+      return NextResponse.json(
+        { error: "folderPath is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if folder exists
+    if (!existsSync(folderPath)) {
+      return NextResponse.json(
+        { error: "Folder does not exist" },
+        { status: 404 }
+      );
+    }
+
+    const folderStat = await stat(folderPath);
+    if (!folderStat.isDirectory()) {
+      return NextResponse.json(
+        { error: "Path is not a directory" },
+        { status: 400 }
+      );
+    }
+
+    // Detect ignore patterns from common ignore files
+    const detectedPatterns: string[] = [];
+    const ignoreFiles = [".gitignore", ".dockerignore", ".npmignore", ".eslintignore"];
+
+    for (const ignoreFile of ignoreFiles) {
+      const ignoreFilePath = join(folderPath, ignoreFile);
+      if (existsSync(ignoreFilePath)) {
+        try {
+          const content = await readFile(ignoreFilePath, "utf-8");
+          const patterns = parseIgnorePatterns(content);
+          detectedPatterns.push(...patterns);
+        } catch {
+          // Ignore read errors
+        }
+      }
+    }
+
+    // Remove duplicates and merge with defaults
+    const defaultPatterns = ["node_modules", ".git", "dist", "build", ".next", "__pycache__", ".venv", "venv"];
+    const allPatterns = [...new Set([...defaultPatterns, ...detectedPatterns])];
+
+    // Count files that would be indexed (with a limit to avoid slowness)
+    const extensions = includeExtensions || [".txt", ".md", ".json", ".ts", ".tsx", ".js", ".jsx", ".py", ".html", ".css"];
+    const excludes = excludePatterns || allPatterns;
+    const shouldRecurse = recursive !== false;
+
+    let fileCount = 0;
+    const maxFilesToCount = 1000; // Limit to avoid slowness
+
+    // Maximum lines before a file is considered "large"
+    const MAX_FILE_LINES = 3000;
+    let largeFileCount = 0;
+    const largeFileExamples: string[] = [];
+
+    async function countFiles(dir: string, depth: number = 0): Promise<void> {
+      if (fileCount >= maxFilesToCount) return;
+      if (!shouldRecurse && depth > 0) return;
+
+      try {
+        const entries = await readdir(dir, { withFileTypes: true });
+
+        for (const entry of entries) {
+          if (fileCount >= maxFilesToCount) break;
+
+          // Check if should be excluded
+          const shouldExclude = excludes.some((pattern: string) => {
+            if (pattern.startsWith("*.")) {
+              return entry.name.endsWith(pattern.slice(1));
+            }
+            return entry.name === pattern || entry.name.startsWith(pattern);
+          });
+
+          if (shouldExclude) continue;
+
+          if (entry.isDirectory()) {
+            await countFiles(join(dir, entry.name), depth + 1);
+          } else if (entry.isFile()) {
+            // Check extension
+            const hasValidExtension = extensions.some((ext: string) => {
+              const normalizedExt = ext.startsWith(".") ? ext : `.${ext}`;
+              return entry.name.endsWith(normalizedExt);
+            });
+            if (hasValidExtension) {
+              fileCount++;
+
+              // Check line count for large file detection (only check first 10 matching files for performance)
+              if (largeFileCount + largeFileExamples.length < 10) {
+                try {
+                  const filePath = join(dir, entry.name);
+                  const content = await readFile(filePath, "utf-8");
+                  const lineCount = content.split("\n").length;
+                  if (lineCount > MAX_FILE_LINES) {
+                    largeFileCount++;
+                    if (largeFileExamples.length < 3) {
+                      largeFileExamples.push(`${entry.name} (${lineCount} lines)`);
+                    }
+                  }
+                } catch {
+                  // Ignore read errors (binary files, etc.)
+                }
+              }
+            }
+          }
+        }
+      } catch {
+        // Ignore permission errors, etc.
+      }
+    }
+
+    await countFiles(folderPath);
+
+    return NextResponse.json({
+      folderPath,
+      folderName: basename(folderPath),
+      detectedPatterns,
+      mergedPatterns: allPatterns,
+      fileCountPreview: fileCount,
+      fileCountLimited: fileCount >= maxFilesToCount,
+      largeFileCount,
+      largeFileExamples,
+      exists: true,
+    });
+  } catch (error) {
+    console.error("[folder-picker] Error:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Internal error" },
+      { status: 500 }
+    );
+  }
+}
+

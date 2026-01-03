@@ -1,0 +1,449 @@
+"use client";
+
+import type { FC } from "react";
+import { Loader2Icon, CheckCircleIcon, XCircleIcon, ImageIcon, VideoIcon, SearchIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+
+// Define the tool call component type manually since it's no longer exported
+type ToolCallContentPartComponent = FC<{
+  toolName: string;
+  argsText?: string;
+  args?: unknown;
+  result?: unknown;
+}>;
+
+interface ImageResult {
+  url: string;
+  width?: number;
+  height?: number;
+  format?: string;
+}
+
+interface VideoResult {
+  url: string;
+  width?: number;
+  height?: number;
+  format?: string;
+  fps?: number;
+  duration?: number;
+}
+
+// Web search source type
+interface WebSearchSource {
+  url: string;
+  title: string;
+  snippet: string;
+  relevanceScore: number;
+}
+
+interface ToolResult {
+  status: "completed" | "processing" | "error" | "success" | "no_results" | "no_api_key" | "no_paths" | "disabled";
+  images?: ImageResult[];
+  videos?: VideoResult[];
+  results?: Array<{
+    prompt?: string;
+    status?: string;
+    images?: ImageResult[];
+    error?: string;
+    // searchTools result fields
+    name?: string;
+    displayName?: string;
+    category?: string;
+    description?: string;
+    isAvailable?: boolean;
+  }>;
+  error?: string;
+  text?: string;
+  jobId?: string;
+  timeTaken?: number;
+  // searchTools specific fields
+  query?: string;
+  message?: string;
+  // webSearch specific fields
+  sources?: WebSearchSource[];
+  answer?: string;
+  formattedResults?: string;
+  iterationPerformed?: boolean;
+}
+
+export const ToolFallback: ToolCallContentPartComponent = ({
+  toolName,
+  argsText,
+  result,
+}) => {
+  const t = useTranslations("assistantUi.tools");
+  const isRunning = result === undefined;
+  const parsedResult = result as ToolResult | undefined;
+
+  // Get translated tool name, fallback to toolName if not found
+  const getToolDisplayName = (name: string): string => {
+    // Check if translation exists by trying to get it
+    // If the key doesn't exist, next-intl returns the key itself
+    const translated = t.has(name) ? t(name) : name;
+    return translated;
+  };
+
+  return (
+    <div className="my-2 rounded-lg bg-terminal-cream/80 shadow-sm p-4 font-mono">
+      <div className="flex items-center gap-2 mb-2">
+        <ToolIcon toolName={toolName} isRunning={isRunning} result={parsedResult} />
+        <span className="font-medium text-sm text-terminal-dark">
+          {getToolDisplayName(toolName)}
+        </span>
+        <ToolStatus isRunning={isRunning} result={parsedResult} />
+      </div>
+
+      {/* Show args summary */}
+      {argsText && (
+        <details className="text-xs text-terminal-muted mb-2">
+          <summary className="cursor-pointer hover:text-terminal-dark">
+            View parameters
+          </summary>
+          <pre className="mt-2 overflow-y-auto max-h-48 rounded bg-terminal-dark/5 p-2 text-xs whitespace-pre-wrap break-words text-terminal-dark">
+            {formatArgs(argsText)}
+          </pre>
+        </details>
+      )}
+
+      {/* Show result */}
+      {parsedResult && <ToolResultDisplay toolName={toolName} result={parsedResult} />}
+    </div>
+  );
+};
+
+const ToolIcon: FC<{
+  toolName: string;
+  isRunning: boolean;
+  result?: ToolResult;
+}> = ({ toolName, isRunning, result }) => {
+  if (isRunning) {
+    return <Loader2Icon className="size-4 animate-spin text-terminal-green" />;
+  }
+
+  if (result?.status === "error") {
+    return <XCircleIcon className="size-4 text-red-600" />;
+  }
+
+  if (toolName === "searchTools" || toolName === "listAllTools" || toolName === "webSearch") {
+    return <SearchIcon className="size-4 text-terminal-green" />;
+  }
+
+  if (toolName.includes("Video") || toolName.includes("video")) {
+    return <VideoIcon className="size-4 text-terminal-green" />;
+  }
+
+  if (toolName.includes("Image") || toolName.includes("image")) {
+    return <ImageIcon className="size-4 text-terminal-green" />;
+  }
+
+  return <CheckCircleIcon className="size-4 text-terminal-green" />;
+};
+
+const ToolStatus: FC<{ isRunning: boolean; result?: ToolResult }> = ({
+  isRunning,
+  result,
+}) => {
+  if (isRunning) {
+    return (
+      <span className="text-xs text-terminal-muted font-mono">Processing...</span>
+    );
+  }
+
+  if (result?.status === "error") {
+    return <span className="text-xs text-red-600 font-mono">Failed</span>;
+  }
+
+  if (result?.status === "processing") {
+    return <span className="text-xs text-terminal-amber font-mono">Queued</span>;
+  }
+
+  return <span className="text-xs text-terminal-green font-mono">Completed</span>;
+};
+
+const ToolResultDisplay: FC<{ toolName: string; result: ToolResult }> = ({ toolName, result }) => {
+  if (result.status === "error") {
+    return (
+      <div className="text-sm text-red-600 bg-red-50 rounded p-2 font-mono">
+        {result.error || "An error occurred"}
+      </div>
+    );
+  }
+
+  if (result.status === "processing") {
+    return (
+      <div className="text-sm text-terminal-muted font-mono">
+        Generation has been queued. Job ID: {result.jobId}
+      </div>
+    );
+  }
+
+  // Handle searchTools results
+  if (toolName === "searchTools") {
+    const searchResults = result.results as Array<{
+      name?: string;
+      displayName?: string;
+      category?: string;
+      description?: string;
+      isAvailable?: boolean;
+    }> | undefined;
+
+    if (result.status === "no_results" || !searchResults || searchResults.length === 0) {
+      return (
+        <div className="text-sm text-terminal-muted font-mono">
+          No tools found matching &quot;{result.query}&quot;
+        </div>
+      );
+    }
+
+    const toolNames = searchResults.map(t => t.displayName || t.name).filter(Boolean);
+    return (
+      <div className="text-sm font-mono">
+        <p className="text-terminal-dark mb-2">
+          Found {searchResults.length} tool{searchResults.length !== 1 ? "s" : ""}: {toolNames.join(", ")}
+        </p>
+        <div className="space-y-1">
+          {searchResults.map((tool, idx) => (
+            <div key={idx} className="flex items-center gap-2 text-xs">
+              <span className={tool.isAvailable ? "text-terminal-green" : "text-terminal-muted"}>
+                {tool.isAvailable ? "●" : "○"}
+              </span>
+              <span className="text-terminal-dark font-medium">{tool.displayName || tool.name}</span>
+              {tool.category && (
+                <span className="text-terminal-muted">({tool.category})</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Handle listAllTools results
+  if (toolName === "listAllTools") {
+    return (
+      <div className="text-sm text-terminal-dark font-mono">
+        {result.message || "Tools listed successfully"}
+      </div>
+    );
+  }
+
+  // Handle webSearch results
+  if (toolName === "webSearch") {
+    // Handle error/no_api_key states
+    if (result.status === "no_api_key" || result.message) {
+      return (
+        <div className="text-sm text-terminal-muted font-mono">
+          {result.message || "Web search unavailable"}
+        </div>
+      );
+    }
+
+    // Display search results with links
+    const sources = result.sources || [];
+    if (sources.length === 0) {
+      return (
+        <div className="text-sm text-terminal-muted font-mono">
+          No results found for &quot;{result.query}&quot;
+        </div>
+      );
+    }
+
+    return (
+      <div className="text-sm font-mono space-y-3">
+        {/* Summary/Answer */}
+        {result.answer && (
+          <div className="text-terminal-dark bg-terminal-dark/5 rounded p-2">
+            <span className="font-medium">Summary:</span> {result.answer}
+          </div>
+        )}
+
+        {/* Sources with clickable links */}
+        <div className="space-y-2">
+          <span className="text-terminal-muted text-xs">
+            {sources.length} source{sources.length !== 1 ? "s" : ""} found:
+          </span>
+          {sources.map((source, idx) => (
+            <div key={idx} className="pl-2 border-l-2 border-terminal-green/30">
+              <a
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-terminal-green hover:underline font-medium block"
+              >
+                {idx + 1}. {source.title}
+              </a>
+              <p className="text-xs text-terminal-muted mt-0.5 line-clamp-2">
+                {source.snippet}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Handle localGrep results
+  if (toolName === "localGrep") {
+    const grepResult = result as ToolResult & {
+      matchCount?: number;
+      pattern?: string;
+      results?: string;
+      matches?: Array<{ file: string; line: number; text: string }>;
+      searchedPaths?: string[];
+    };
+
+    // Handle no_paths or disabled status
+    if (grepResult.status === "no_paths" || grepResult.status === "disabled") {
+      return (
+        <div className="text-sm text-terminal-muted font-mono">
+          {grepResult.message || "No paths to search"}
+        </div>
+      );
+    }
+
+    // Handle success with results
+    if (grepResult.matchCount !== undefined) {
+      return (
+        <div className="text-sm font-mono">
+          <p className="text-terminal-dark mb-2">
+            Found {grepResult.matchCount} match{grepResult.matchCount !== 1 ? "es" : ""} for &quot;{grepResult.pattern}&quot;
+          </p>
+          {grepResult.results && (
+            <pre className="mt-2 overflow-x-auto max-h-64 rounded bg-terminal-dark/5 p-2 text-xs whitespace-pre-wrap break-words text-terminal-dark">
+              {grepResult.results}
+            </pre>
+          )}
+        </div>
+      );
+    }
+
+    // Fallback for other localGrep statuses
+    return (
+      <div className="text-sm text-terminal-muted font-mono">
+        {grepResult.message || "Search completed"}
+      </div>
+    );
+  }
+
+  // Show generated videos
+  if (result.videos && result.videos.length > 0) {
+    return (
+      <div className="mt-2">
+        <div className="space-y-4">
+          {result.videos.map((video, idx) => (
+            <div key={idx} className="relative">
+              <video
+                src={video.url}
+                controls
+                className="w-full max-w-lg h-auto rounded-lg shadow-sm"
+                preload="metadata"
+              >
+                Your browser does not support the video tag.
+              </video>
+              <div className="mt-1 flex items-center gap-2 text-xs text-terminal-muted font-mono">
+                {video.duration && <span>{video.duration}s</span>}
+                {video.fps && <span>• {video.fps} fps</span>}
+                <a
+                  href={video.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-auto hover:text-terminal-green"
+                >
+                  Open in new tab ↗
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+        {result.timeTaken && (
+          <p className="mt-2 text-xs text-terminal-muted font-mono">
+            Generated in {result.timeTaken.toFixed(1)}s
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  // Show generated images
+  if (result.images && result.images.length > 0) {
+    return (
+      <div className="mt-2">
+        <div className="image-grid">
+          {result.images.map((img, idx) => (
+            <a
+              key={idx}
+              href={img.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <img
+                src={img.url}
+                alt={`Generated image ${idx + 1}`}
+                className="w-full h-auto rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              />
+            </a>
+          ))}
+        </div>
+        {result.text && (
+          <p className="mt-2 text-sm text-terminal-muted font-mono">{result.text}</p>
+        )}
+      </div>
+    );
+  }
+
+  // Show batch results
+  if (result.results && result.results.length > 0) {
+    return (
+      <div className="mt-2 space-y-4">
+        {result.results.map((item, idx) => (
+          <div key={idx} className="pt-4 first:pt-0">
+            {item.prompt && (
+              <p className="text-xs text-terminal-muted mb-2 font-mono">
+                Variation {idx + 1}: {item.prompt.slice(0, 50)}...
+              </p>
+            )}
+            {!item.prompt && (
+              <p className="text-xs text-terminal-muted mb-2 font-mono">
+                Variation {idx + 1}
+              </p>
+            )}
+            {item.status === "completed" && item.images && (
+              <div className="image-grid">
+                {item.images.map((img, imgIdx) => (
+                  <a
+                    key={imgIdx}
+                    href={img.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <img
+                      src={img.url}
+                      alt={`Variation ${idx + 1} - ${imgIdx + 1}`}
+                      className="w-full h-auto rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                    />
+                  </a>
+                ))}
+              </div>
+            )}
+            {item.status === "error" && (
+              <p className="text-sm text-red-600 font-mono">{item.error}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return null;
+};
+
+function formatArgs(argsText: string): string {
+  try {
+    const parsed = JSON.parse(argsText);
+    return JSON.stringify(parsed, null, 2);
+  } catch {
+    return argsText;
+  }
+}

@@ -1,0 +1,98 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Next.js
+.next
+out
+build
+Context-Engine/
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Drizzle
+drizzle/*.sql
+.vercel
+
+# Supertonic TTS - exclude the cloned .git folder but keep the models
+public/assets/supertonic/.git
+
+# ONNX Runtime WASM files (copied from node_modules)
+public/ort-*.wasm
+
+# Electron
+electron-dist
+dist-electron
+
+# Local development data (SQLite, media, settings)
+.local-data/
+
+# Local embedding models (keep README)
+models/**
+!models/README.md
+
+# Video files (should not be in repo - use external storage)
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.wmv
+*.flv
+*.m4v
+
+# Audio files (large binary files)
+*.wav
+*.mp3
+*.flac
+*.aac
+*.ogg
+*.m4a
+
+# Large image formats (raw/uncompressed)
+*.psd
+*.ai
+*.raw
+*.tiff
+*.bmp
+
+# Database files
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Meilisearch data
+data.ms/
+
+# Misc large files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z

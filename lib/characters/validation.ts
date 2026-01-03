@@ -1,0 +1,70 @@
+import { z } from "zod";
+
+// ============================================================================
+// ENUM SCHEMAS
+// ============================================================================
+
+export const characterStatusSchema = z.enum(["draft", "active", "archived"]);
+
+export const characterImageTypeSchema = z.enum([
+  "portrait", "full_body", "expression", "outfit", "scene", "avatar"
+]);
+
+// ============================================================================
+// BASE CHARACTER SCHEMA
+// ============================================================================
+
+export const createCharacterSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100, "Name too long"),
+  displayName: z.string().max(100).optional(),
+  tagline: z.string().max(200).optional(),
+  isDefault: z.boolean().optional().default(false),
+});
+
+export const updateCharacterSchema = createCharacterSchema.partial().extend({
+  status: characterStatusSchema.optional(),
+});
+
+// ============================================================================
+// CHARACTER IMAGE SCHEMA
+// ============================================================================
+
+export const characterImageSchema = z.object({
+  imageType: characterImageTypeSchema,
+  isPrimary: z.boolean().optional().default(false),
+  s3Key: z.string().min(1),
+  url: z.string().url(),
+  thumbnailUrl: z.string().url().optional(),
+  width: z.number().positive().optional(),
+  height: z.number().positive().optional(),
+  format: z.string().max(20).optional(),
+  prompt: z.string().max(2000).optional(),
+  seed: z.number().optional(),
+  generationModel: z.string().max(50).optional(),
+  sortOrder: z.number().int().optional().default(0),
+  metadata: z.record(z.unknown()).optional().default({}),
+});
+
+// ============================================================================
+// AGENT METADATA SCHEMA (B2B Agent Configuration)
+// ============================================================================
+
+/**
+ * Agent metadata for B2B agent configuration.
+ * Stored in characters.metadata JSON column.
+ */
+export const agentMetadataSchema = z.object({
+  /** List of enabled tool names for this agent */
+  enabledTools: z.array(z.string()).optional(),
+  /** Agent's purpose/responsibilities description */
+  purpose: z.string().max(2000).optional(),
+});
+
+// ============================================================================
+// TYPE EXPORTS
+// ============================================================================
+
+export type CreateCharacterInput = z.infer<typeof createCharacterSchema>;
+export type UpdateCharacterInput = z.infer<typeof updateCharacterSchema>;
+export type CharacterImageInput = z.infer<typeof characterImageSchema>;
+export type AgentMetadata = z.infer<typeof agentMetadataSchema>;
